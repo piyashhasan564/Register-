@@ -1,0 +1,1616 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Reunion User Panel</title>
+    <!-- FontAwesome for Premium Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- SweetAlert2 for Premium Alerts -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Html2Canvas for ID Card Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- Tesseract.js for OCR (Image to Text) -->
+    <script src='https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js'></script>
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', 'Hind Siliguri', sans-serif; }
+        
+        body {
+            background: linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%);
+            background-image: linear-gradient(to top, #30cfd0 0%, #330867 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 10px;
+            flex-direction: column;
+            font-weight: 500;
+        }
+
+        /* --- 1. NEW LOADING SCREEN (BLACK BACKGROUND) --- */
+        #black-loading-screen {
+            display: none; /* শুরুতে লুকানো থাকবে */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000000; /* একদম কালো */
+            z-index: 99999;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        
+        .loading-text-style {
+            color: #ffffff;
+            font-size: 22px;
+            font-weight: 600;
+            font-family: sans-serif;
+            letter-spacing: 1px;
+        }
+
+        /* ডট এনিমেশন */
+        .dots::after {
+            content: '.';
+            animation: dotsAnim 1.5s steps(5, end) infinite;
+        }
+        @keyframes dotsAnim {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60% { content: '...'; }
+            80%, 100% { content: ''; }
+        }
+
+        /* --- SCHOOL NAME ANIMATION --- */
+        .school-title {
+            text-align: center;
+            color: #fff;
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            animation: bounceInDown 1.2s;
+            line-height: 1.3;
+        }
+        @keyframes bounceInDown {
+            0% { opacity: 0; transform: translateY(-200px); }
+            60% { opacity: 1; transform: translateY(30px); }
+            100% { transform: translateY(0); }
+        }
+
+        /* --- POPUP MODAL --- */
+        .popup-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); z-index: 5000; justify-content: center; align-items: center; backdrop-filter: blur(8px);
+        }
+        .popup-box {
+            background: white; padding: 30px; border-radius: 20px; text-align: center; width: 90%; max-width: 320px;
+            animation: zoomUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3); position: relative;
+        }
+        @keyframes zoomUp { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        
+        .popup-logo {
+            width: 90px; height: 90px; border-radius: 50%; object-fit: cover; margin-bottom: 15px; 
+            border: 4px solid #1877F2; box-shadow: 0 5px 15px rgba(24, 119, 242, 0.3);
+        }
+        .popup-box h3 { font-weight: 800; color: #1877F2; font-size: 20px; margin-bottom: 5px; }
+        .popup-box p { font-weight: 600; font-size: 14px; color: #555; margin-bottom: 20px; }
+        
+        .popup-btn {
+            background: #1877F2; color: white; border: none; padding: 12px 25px; border-radius: 50px;
+            margin-top: 10px; cursor: pointer; font-weight: 700; width: 100%; font-size: 15px;
+            box-shadow: 0 4px 10px rgba(24, 119, 242, 0.4); text-decoration: none; display: block;
+            transition: 0.3s;
+        }
+        .popup-btn:active { transform: scale(0.95); }
+        .close-popup { 
+            margin-top: 10px; background: #dfe6e9; color: #636e72; box-shadow: none; 
+        }
+
+        /* --- APPROVED BATCH BUTTON --- */
+        .approved-batch-btn {
+            background: linear-gradient(45deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
+            color: #d90429;
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-weight: 700;
+            border: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+            margin-bottom: 15px;
+            cursor: pointer;
+            display: flex; align-items: center; gap: 8px; font-size: 12px; text-transform: uppercase;
+        }
+
+        /* --- CONTAINER STYLE --- */
+        .container {
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            width: 100%;
+            max-width: 360px;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+            animation: zoomIn 0.6s ease-out;
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+        @keyframes zoomIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        .lang-btn {
+            position: absolute; top: 15px; right: 15px; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none; padding: 4px 10px; border-radius: 15px; cursor: pointer; 
+            font-weight: 600; font-size: 10px; color: #fff; z-index: 100;
+        }
+
+        /* --- TABS --- */
+        .tabs { 
+            display: flex; justify-content: space-between; margin-bottom: 15px; 
+            background: #eef2f5; padding: 4px; border-radius: 50px; 
+        }
+        .tab-btn { 
+            width: 50%; padding: 8px; border: none; background: none; 
+            font-size: 14px; font-weight: 600; cursor: pointer; color: #777; 
+            border-radius: 50px; transition: 0.3s; 
+        }
+        .tab-btn.active { 
+            background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+            color: white; box-shadow: 0 2px 10px rgba(79, 172, 254, 0.4); 
+        }
+
+        .form-box { display: none; animation: fadeIn 0.5s; }
+        .form-box.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* --- FORM INPUTS (PREMIUM DESIGN) --- */
+        .form-group { margin-bottom: 12px; position: relative; }
+        .form-group label { 
+            display: block; margin-bottom: 5px; font-weight: 600; color: #444; font-size: 12px; 
+            display: flex; align-items: center; gap: 5px;
+        }
+        .form-group label i { color: #764ba2; font-size: 12px; }
+        
+        .form-group input, .form-group select { 
+            width: 100%; padding: 12px; 
+            border: 2px solid #e0e0e0; border-radius: 12px; 
+            font-size: 13px; font-weight: 500; color: #333; outline: none; transition: 0.3s; 
+            background: #fdfdfd; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .form-group input:focus, .form-group select:focus { 
+            border-color: #4facfe; 
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.2);
+            background: #fff;
+        }
+
+        /* --- BUTTONS --- */
+        .btn { 
+            width: 100%; padding: 12px; border: none; border-radius: 10px; 
+            font-size: 14px; font-weight: 700; cursor: pointer; transition: 0.3s; 
+            margin-top: 10px; color: white; 
+            background: linear-gradient(to right, #43e97b 0%, #38f9d7 100%); 
+            box-shadow: 0 5px 15px rgba(67, 233, 123, 0.3); 
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        .btn:active { transform: scale(0.98); }
+        #loginBtn { background: linear-gradient(to right, #fa709a 0%, #fee140 100%); box-shadow: 0 5px 15px rgba(250, 112, 154, 0.3); }
+        
+        /* Profile Styles */
+        #profileView { display: none; text-align: center; }
+        .id-card { 
+            background: white; border-radius: 15px; overflow: hidden; position: relative; 
+            border: none; margin-bottom: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); 
+        }
+        
+        /* --- COVER BG --- */
+        .cover-bg { 
+            min-height: 140px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+            padding: 15px; align-items: center;
+            border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;
+        }
+
+        .stats-box {
+            display: none; background: rgba(255, 255, 255, 0.2);
+            border-radius: 8px; padding: 8px 5px; text-align: center; color: white;
+            backdrop-filter: blur(5px); width: 100%; border: 1px solid rgba(255,255,255,0.3);
+        }
+        .stats-count { font-size: 16px; font-weight: 800; display: block; }
+        .stats-label { font-size: 9px; text-transform: uppercase; font-weight: 700; opacity: 0.9; }
+
+        .profile-img-container { 
+            width: 100px; height: 100px; margin: -40px auto 5px;
+            border-radius: 50%; background: white; padding: 4px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2); position: relative; z-index: 10; 
+        }
+        .profile-img-container img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+        
+        .user-name { font-size: 20px; color: #2d3436; font-weight: 800; margin-bottom: 2px; }
+        .user-batch { color: #636e72; font-size: 13px; font-weight: 600; margin-bottom: 5px; display: block;}
+        
+        .sl-number { 
+            font-weight: 800; color: #0984e3; font-size: 14px; margin-bottom: 10px; 
+            display: none; background: #e1f5fe; padding: 4px 12px; border-radius: 20px; 
+        }
+
+        .status-badge { display: inline-block; padding: 6px 15px; border-radius: 20px; font-size: 11px; font-weight: 700; margin-bottom: 15px; text-transform: uppercase; }
+        .status-pending { background: #ffeaa7; color: #d35400; }
+        .status-success { background: #55efc4; color: #006266; }
+        .status-rejected { background: #fab1a0; color: #c0392b; }
+
+        /* DOWNLOAD BUTTON STYLE */
+        .download-btn {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white; border: none; padding: 6px 12px;
+            border-radius: 20px; font-size: 12px; font-weight: 600;
+            cursor: pointer; margin-left: 10px; display: none;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+            animation: pulse 2s infinite;
+        }
+
+        .full-details { display: none; text-align: left; padding: 0 20px 20px; animation: fadeIn 0.5s; }
+        .detail-row { display: flex; justify-content: space-between; border-bottom: 1px dashed #dfe6e9; padding: 10px 0; font-size: 13px; }
+        .detail-row span { font-weight: 600; color: #636e72; display: flex; align-items: center; gap: 5px;}
+        .detail-row strong { font-weight: 700; color: #2d3436; text-align: right; }
+        .detail-title { 
+            background: #f1f2f6; padding: 8px 12px; font-weight: 800; font-size: 12px; 
+            color: #2f3542; margin-top: 15px; border-radius: 6px; text-transform: uppercase;
+            border-left: 3px solid #764ba2;
+        }
+
+        /* Copy Button Style */
+        .copy-btn {
+            cursor: pointer; color: #6c5ce7; margin-left: 8px; font-size: 14px;
+            transition: 0.2s;
+        }
+        .copy-btn:active { transform: scale(0.9); }
+
+        /* Payment Form */
+        #paymentFormSection { display: none; text-align: left; background: #fff; padding: 5px; animation: fadeIn 0.3s; }
+        
+        .guest-option { 
+            background: #fff; padding: 12px; border-radius: 12px; margin-bottom: 10px; 
+            border: 1px solid #eee; box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+            transition: 0.2s;
+        }
+        .guest-option:hover { border-color: #a29bfe; }
+
+        .guest-header { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; font-weight: 700; color: #444; font-size: 13px; }
+        .guest-header input[type="checkbox"] { width: 18px; height: 18px; accent-color: #6c5ce7; cursor: pointer; }
+        
+        .total-box { 
+            background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%); 
+            padding: 15px; text-align: center; border-radius: 12px; margin: 15px 0; 
+            color: white; box-shadow: 0 5px 15px rgba(102, 166, 255, 0.4); 
+        }
+        .total-box h2 { color: white; margin: 0; font-weight: 800; font-size: 24px; }
+        
+        .pay-now-btn { 
+            background: linear-gradient(to right, #ff512f, #dd2476); 
+            color: white; width: 100%; padding: 14px; border: none; border-radius: 10px; 
+            font-size: 15px; font-weight: 800; cursor: pointer; animation: pulse 2s infinite; 
+            margin-top: 10px; box-shadow: 0 5px 15px rgba(221, 36, 118, 0.4); display: none;
+        }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
+        
+        .back-btn { background: #dfe6e9; color: #636e72; margin-top: 10px; box-shadow: none; }
+
+        /* --- BATCH LIST MODAL --- */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 3000; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
+        .modal-content { background: white; width: 90%; max-width: 350px; padding: 20px; border-radius: 15px; max-height: 70vh; overflow-y: auto; text-align: center; position: relative; animation: zoomUp 0.3s; }
+        .batch-grid-view { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+        .batch-folder { background: #fff; border: 1px solid #eee; padding: 10px; border-radius: 10px; cursor: pointer; transition: 0.3s; }
+        .batch-folder:hover { background: #f0faff; border-color: #4facfe; }
+        .batch-folder i { font-size: 25px; color: #fbc531; margin-bottom: 5px; }
+        .batch-folder h4 { margin: 0; color: #2f3542; font-weight: 700; font-size: 14px; }
+        .batch-folder span { font-size: 11px; color: #a4b0be; font-weight: 600; }
+        .close-modal-btn { position: absolute; top: 10px; right: 15px; font-size: 24px; cursor: pointer; color: #ff7675; }
+
+        /* --- CARD FEE MODAL STYLES (NEW) --- */
+        #cardFeeModal .modal-content { border-top: 5px solid #e2136e; }
+        .fee-notice { background: #fff3cd; color: #856404; padding: 10px; border-radius: 8px; font-size: 12px; margin-bottom: 15px; border: 1px solid #ffeeba; }
+        .fee-amount { font-size: 24px; font-weight: 800; color: #e2136e; margin: 10px 0; }
+        
+        .trx-input { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 10px; font-size: 14px; text-align: center; margin-bottom: 10px; }
+        .trx-input:focus { border-color: #e2136e; outline: none; }
+        
+        .or-divider { font-size: 12px; color: #999; margin: 5px 0 10px; font-weight: 600; display:block; }
+
+        /* --- 2. UPDATED UPLOAD BUTTON STYLE (MATCHING YOUR IMAGE) --- */
+        .upload-dashed-area {
+            background-color: #eff3ff; /* হালকা নীলচে ব্যাকগ্রাউন্ড */
+            border: 1.5px dashed #4e4eff; /* নীলচে/পার্পল ড্যাশড বর্ডার */
+            border-radius: 8px;
+            padding: 12px;
+            cursor: pointer;
+            transition: 0.3s;
+            color: #4e4eff;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .upload-dashed-area:hover { 
+            background-color: #e0e7ff; 
+        }
+        
+        .verify-btn { background: #e2136e; color: white; width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 14px; }
+
+        /* --- FOOTER MODEL 3 (MAGIC BORDER) --- */
+        .dev-footer {
+            text-align: center; margin-top: 50px; padding-bottom: 30px; color: rgba(255,255,255,0.9);
+        }
+        .dev-logo {
+            width: 100px; height: 100px; border-radius: 50%; 
+            border: 5px solid #fff; object-fit: cover; 
+            margin-bottom: 15px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            animation: magicFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes magicFloat {
+            0% { transform: translateY(0px); border-color: #FFD700; }
+            50% { transform: translateY(-10px); border-color: #00d2d3; }
+            100% { transform: translateY(0px); border-color: #FFD700; }
+        }
+        .dev-name { font-size: 14px; font-weight: 800; margin-bottom: 10px; text-shadow: 0 2px 5px rgba(0,0,0,0.3); }
+        .social-icons { display: flex; justify-content: center; gap: 15px; }
+        .social-btn { width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-size: 18px; text-decoration: none; background: rgba(255,255,255,0.1); backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+
+        /* Custom SweetAlert Style */
+        .swal2-popup {
+            font-family: 'Poppins', sans-serif !important;
+            border-radius: 20px !important;
+        }
+        .swal2-title {
+            color: #2d3436 !important;
+            font-size: 20px !important;
+        }
+        .swal2-confirm {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            box-shadow: 0 5px 15px rgba(118, 75, 162, 0.4) !important;
+        }
+
+        /* ----- HIDDEN CARD STYLES (EXACTLY FROM TEST.HTML) ----- */
+        #final-card {
+            position: relative;
+            /* ক্যানভা ডিজাইনের অনুপাত অনুযায়ী ফিক্সড সাইজ */
+            width: 400px; 
+            height: 566px; 
+            flex-shrink: 0;
+            background-color: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        /* ব্যাকগ্রাউন্ড ইমেজ */
+        #bg-layer {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0; left: 0;
+            z-index: 1;
+        }
+
+        /* ১. ইউজার ফটো (UPDATED: Added Black Border) */
+        #user-pic {
+            position: absolute;
+            width: 170px;  /* ছবির সাইজ */
+            height: 170px;
+            border-radius: 50%;
+            object-fit: cover;
+            
+            /* টপ-লেফট অ্যাডজাস্টমেন্ট */
+            top: 235px;   /* উপর থেকে নিচে নামানো */
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2;   /* ব্যাকগ্রাউন্ডের উপরে */
+            
+            /* NEW: BLACK CIRCLE BORDER */
+            border: 4px solid #000000;
+            box-sizing: border-box;
+        }
+
+        /* ২. নাম (সবুজ বক্সের জায়গায়) */
+        .name-badge {
+            position: absolute;
+            top: 435px;   /* ছবির নিচে, রিবনের নিচে */
+            left: 50%;
+            transform: translateX(-50%);
+            
+            background-color: #00a651; /* হুবহু ডিজাইনের সবুজ কালার */
+            color: white;
+            padding: 5px 30px;
+            border-radius: 50px;
+            font-size: 20px;
+            font-weight: bold;
+            text-transform: capitalize;
+            white-space: nowrap;
+            z-index: 3;
+        }
+
+        /* ৩. ব্যাচ এবং SL (নিচে) */
+        .info-text {
+            position: absolute;
+            top: 480px; /* নামের নিচে */
+            width: 100%;
+            text-align: center;
+            z-index: 3;
+            line-height: 1.4;
+        }
+
+        .batch-style {
+            color: #00aeef; /* আকাশী নীল */
+            font-size: 18px;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+        
+        .sl-style {
+            color: black;
+            font-size: 15px;
+            font-weight: bold;
+        }
+
+        /* ৪. তারিখ (একদম নিচে) */
+        .date-style {
+            position: absolute;
+            bottom: 15px; /* একদম নিচে */
+            width: 100%;
+            text-align: center;
+            font-size: 13px;
+            font-weight: bold;
+            color: black;
+            z-index: 3;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NEW FULL SCREEN BLACK LOADING OVERLAY -->
+    <div id="black-loading-screen">
+        <div class="loading-text-style">
+            Loading<span class="dots"></span> <span id="ocr-percentage">0%</span>
+        </div>
+    </div>
+
+    <!-- School Title Animation -->
+    <div class="school-title">
+        বিশ্বহরিগাছা বহালগাছা উচ্চ বিদ্যালয় <br> পুনর্মিলনী ২০২৬
+    </div>
+
+    <!-- FACEBOOK POPUP -->
+    <div id="fbPopup" class="popup-overlay">
+        <div class="popup-box">
+            <!-- School Logo -->
+            <img src="https://i.ibb.co.com/PzVtgrv3/FB-IMG-1768154944781.jpg" class="popup-logo" alt="School Logo">
+            <h3>আমাদের পেজ ফলো করুন!</h3>
+            <p>বিশ্বহরিগাছা বহালগাছা উচ্চ বিদ্যালয়</p>
+            <a href="https://www.facebook.com/share/1C57oEp3Xf/" target="_blank" class="popup-btn popup-btn-primary"><i class="fab fa-facebook-f"></i> Follow Page</a>
+            <button class="popup-btn close-popup" onclick="closePopup()">Close</button>
+        </div>
+    </div>
+
+    <!-- Approved Batches Button -->
+    <button class="approved-batch-btn" onclick="showApprovedBatches()">
+        <i class="fas fa-folder-open"></i> <span data-key="btnApproved">All Registered Participants</span>
+    </button>
+
+    <!-- BATCH LIST MODAL -->
+    <div id="batchModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-modal-btn" onclick="document.getElementById('batchModal').style.display='none'">&times;</span>
+            <h3 style="color:#6c5ce7; font-weight:800; margin-bottom:10px;">Approved Batches</h3>
+            <div id="batchListContainer" class="batch-grid-view">
+                <!-- Batches will load here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- NEW: CARD FEE VERIFICATION MODAL (UPDATED LAYOUT) -->
+    <div id="cardFeeModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-modal-btn" onclick="closeCardFeeModal()">&times;</span>
+            
+            <!-- FIXED ICON HERE -->
+            <div style="margin-bottom: 10px;">
+                 <i class="fas fa-download" style="font-size: 30px; color: #444;"></i>
+                 <i class="fas fa-arrow-right" style="margin: 0 10px; color: #999;"></i>
+                 <i class="fas fa-id-card" style="font-size: 30px; color: #e2136e;"></i>
+            </div>
+
+            <h3 style="color:#e2136e; font-weight:800; margin-bottom:5px;">কার্ড ডাউনলোড ফি</h3>
+            
+            <div id="adminNoticeText" class="fee-notice">
+                <!-- Admin notice will load here -->
+            </div>
+
+            <div class="fee-amount"><span id="adminFeeAmount">5</span> ৳</div>
+            
+            <p style="font-size:12px; color:#555; margin-bottom:15px;">
+                বিকাশ "Send Money" করুন এই নম্বরে:<br>
+                <!-- Number with COPY BUTTON -->
+                <strong style="font-size:18px; color:#2d3436; background:#f1f2f6; padding:5px 15px; border-radius:50px; display:inline-flex; align-items:center; margin-top:5px; border:1px dashed #e2136e;" id="adminBkashNumber">
+                    Loading...
+                </strong>
+                <i class="fas fa-copy copy-btn" onclick="copyToClipboard('adminBkashNumber')" style="font-size:18px; margin-left:8px;"></i>
+            </p>
+
+            <!-- INPUT AT TOP -->
+            <input type="text" id="cardTrxInput" class="trx-input" placeholder="TrxID (Type or Paste SMS)" style="text-transform: uppercase;">
+            
+            <!-- SEPARATOR -->
+            <span class="or-divider">অথবা</span>
+
+            <!-- UPDATED UPLOAD BUTTON (Like Red Circled Area) -->
+            <div class="upload-dashed-area" onclick="triggerCamera()">
+                <i class="fas fa-image" style="font-size: 18px;"></i>
+                <span>স্ক্রিনশট আপলোড করুন</span>
+            </div>
+            <input type="file" id="scanInput" accept="image/*" style="display:none;" onchange="handleScreenshot(this)">
+            
+            <button class="verify-btn" id="verifyCardBtn" onclick="verifyCardPayment()">Verify & Download</button>
+            <p id="cardVerifyMsg" style="font-size:11px; margin-top:8px; font-weight:bold;"></p>
+        </div>
+    </div>
+
+    <div class="container">
+        <button class="lang-btn" id="langToggle" onclick="toggleLanguage()"><i class="fas fa-globe"></i> EN</button>
+
+        <!-- Login/Register -->
+        <div id="authContainer">
+            <h2 style="text-align: center; margin-bottom: 15px; color: #2d3436; font-weight:800; font-size: 20px;" data-key="welcome">স্বাগতম!</h2>
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('login')" data-key="login">লগইন</button>
+                <button class="tab-btn" onclick="switchTab('register')" data-key="register">রেজিস্ট্রেশন</button>
+            </div>
+
+            <div id="loginSection" class="form-box active">
+                <form id="loginForm">
+                    <div class="form-group"><label data-key="mobile"><i class="fas fa-mobile-alt"></i> মোবাইল নম্বর</label><input type="tel" id="loginPhone" oninput="forceEnglish(this)" required></div>
+                    <div class="form-group"><label data-key="password"><i class="fas fa-lock"></i> পাসওয়ার্ড</label><input type="password" id="loginPass" required></div>
+                    <button type="submit" class="btn" id="loginBtn" data-key="loginBtn">লগইন করুন</button>
+                    <p id="msgLogin" style="color:#e74c3c; text-align:center; margin-top:10px; font-weight:600; font-size:12px;"></p>
+                </form>
+            </div>
+
+            <div id="registerSection" class="form-box">
+                <form id="regForm">
+                    <!-- ENFORCE ENGLISH INPUT HERE -->
+                    <div class="form-group"><label data-key="name"><i class="fas fa-user"></i> নাম (English Only)</label><input type="text" id="regName" oninput="forceEnglish(this)" required></div>
+                    <div class="form-group"><label data-key="batch"><i class="fas fa-graduation-cap"></i> ব্যাচ (SSC - Digits Only)</label><input type="tel" id="regBatch" oninput="forceEnglish(this)" required></div>
+                    
+                    <div class="form-group"><label data-key="mobile"><i class="fas fa-phone-alt"></i> মোবাইল নম্বর</label><input type="tel" id="regPhone" oninput="forceEnglish(this)" required></div>
+                    
+                    <div class="form-group"><label data-key="altMobile"><i class="fas fa-phone"></i> বিকল্প মোবাইল নম্বর (ঐচ্ছিক)</label><input type="tel" id="regAltPhone" oninput="forceEnglish(this)" placeholder="Optional"></div>
+
+                    <div class="form-group"><label data-key="address"><i class="fas fa-map-marker-alt"></i> বর্তমান ঠিকানা (English)</label><input type="text" id="regAddress" oninput="forceEnglish(this)" required></div>
+                    <div class="form-group"><label data-key="password"><i class="fas fa-key"></i> পাসওয়ার্ড</label><input type="password" id="regPass" minlength="6" required></div>
+                    <div class="form-group"><label data-key="photo"><i class="fas fa-camera"></i> ছবি</label><input type="file" id="regPhoto" accept="image/*" required></div>
+                    <button type="submit" class="btn" id="regBtn" data-key="regBtn">রেজিস্ট্রেশন করুন</button>
+                    <p id="msgRegister" style="color:#e74c3c; text-align:center; margin-top:10px; font-weight:600; font-size:12px;"></p>
+                </form>
+            </div>
+        </div>
+
+        <!-- Profile View -->
+        <div id="profileView">
+            <div class="id-card" id="mainIdCard">
+                
+                <div class="cover-bg">
+                    <div class="stats-box" id="statRegistered">
+                        <span class="stats-count" id="valRegistered">0</span>
+                        <span class="stats-label" data-key="statReg">Registered</span>
+                    </div>
+                    <div class="stats-box" id="statPaid">
+                        <span class="stats-count" id="valPaid">0</span>
+                        <span class="stats-label" data-key="statPaid">Paid Users</span>
+                    </div>
+                    <div class="stats-box" id="statCollected">
+                        <span class="stats-count" id="valCollected">0</span>
+                        <span class="stats-label" data-key="statCollect">Collected</span>
+                    </div>
+                    <div class="stats-box" id="statGuest">
+                        <span class="stats-count" id="valGuest">0</span>
+                        <span class="stats-label" data-key="statGuest">Guests</span>
+                    </div>
+                </div>
+
+                <div class="profile-img-container"><img id="viewPhoto" src="" alt="Profile"></div>
+                <h3 class="user-name" id="viewName">Name</h3>
+                <span class="user-batch"><span data-key="batch_label">SSC Batch:</span> <span id="viewBatch">--</span></span>
+                <div id="slNumberDisplay" class="sl-number" style="display:none;"></div>
+                
+                <!-- Status & Download Button Wrapper -->
+                <div style="margin-bottom: 15px;">
+                    <div id="statusContainer" class="status-badge status-pending">Pending</div>
+                    
+                    <button id="downloadCardBtn" class="download-btn" onclick="generateAndDownloadCard()">
+                        <i class="fas fa-download"></i> Card
+                    </button>
+                    
+                    <!-- NEW: CARD SYSTEM CLOSED MSG -->
+                    <p id="cardSystemClosedMsg" style="display:none; color:#c0392b; font-weight:700; margin-top:10px; background: #fab1a0; padding:10px; border-radius:8px; font-size: 13px;">
+                        <i class="fas fa-exclamation-circle"></i> কার্ড ডাউনলোড অপশন এখনো চালু হয়নি।
+                    </p>
+                </div>
+
+                <div class="full-details" style="display:block;">
+                    <!-- User Phone with COPY BUTTON -->
+                    <div class="detail-row">
+                        <span data-key="mobile"><i class="fas fa-phone-alt"></i> মোবাইল নম্বর:</span> 
+                        <span style="display:flex; align-items:center;">
+                            <strong id="viewPhone">--</strong>
+                            <i class="fas fa-copy copy-btn" onclick="copyToClipboard('viewPhone')"></i>
+                        </span>
+                    </div>
+                    
+                    <div class="detail-row" id="rowAltPhone" style="display:none;"><span data-key="altMobile"><i class="fas fa-phone"></i> বিকল্প মোবাইল:</span> <strong id="viewAltPhone">--</strong></div>
+                    <div class="detail-row"><span data-key="address"><i class="fas fa-map-marker-alt"></i> ঠিকানা:</span> <strong id="viewAddress">--</strong></div>
+                </div>
+
+                <div id="approvedDetails" class="full-details">
+                    <div class="detail-title" data-key="payInfo">পেমেন্ট তথ্য</div>
+                    
+                    <div class="detail-row"><span data-key="methodLabel"><i class="fas fa-wallet"></i> মেথড:</span> <strong id="vMethod">--</strong></div>
+                    <div class="detail-row"><span data-key="senderLabel"><i class="fas fa-paper-plane"></i> সেন্ডার নম্বর:</span> <strong id="vSender">--</strong></div>
+                    <div class="detail-row"><span data-key="amountLabel"><i class="fas fa-money-bill-wave"></i> টাকার পরিমাণ:</span> <strong id="vAmount" style="color:#27ae60">--</strong></div>
+                    
+                    <div id="vGuestBox">
+                        <div class="detail-title" data-key="guestInfo">অতিথি তথ্য</div>
+                        <div class="detail-row" id="rowSpouse"><span data-key="spouseLabel"><i class="fas fa-user-friends"></i> স্বামী/স্ত্রী:</span> <strong id="vSpouse"></strong></div>
+                        <div class="detail-row" id="rowKidA"><span data-key="kidALabel"><i class="fas fa-child"></i> Above 5 Years:</span> <strong id="vKidA"></strong></div>
+                        <div class="detail-row" id="rowKidB"><span data-key="kidBLabel"><i class="fas fa-baby"></i> Below 5 Years:</span> <strong id="vKidB"></strong></div>
+                    </div>
+                    
+                    <div class="detail-row" style="margin-top:15px; border-bottom: none;"><span data-key="tshirtLabel"><i class="fas fa-tshirt"></i> T-Shirt Size:</span> <strong id="vTshirt" style="color:#6c5ce7; font-size: 18px;">--</strong></div>
+                </div>
+
+                <div style="padding: 0 20px 20px;">
+                    <button id="showPayFormBtn" class="pay-now-btn" data-key="payBtn"><i class="fas fa-credit-card"></i> পেমেন্ট করুন</button>
+                    <p id="paymentClosedMsg" style="color:#c0392b; font-weight:700; display:none; margin-top:15px; background: #fab1a0; padding:10px; border-radius:8px;"><i class="fas fa-exclamation-triangle"></i> পেমেন্ট সাময়িকভাবে বন্ধ আছে।</p>
+                </div>
+            </div>
+
+            <!-- Payment Form -->
+            <div id="paymentFormSection">
+                <h3 style="color: #6c5ce7; margin-bottom: 20px; font-weight:800; text-align:center;" data-key="payDetails">পেমেন্ট বিবরণ</h3>
+                
+                <div class="guest-option">
+                    <div class="guest-header">
+                        <input type="checkbox" id="checkSpouse" onchange="calculateTotal()">
+                        <label for="checkSpouse"><span data-key="spouseLabel">Spouse</span> - <span id="dispSpouseFee">500</span>৳</label>
+                    </div>
+                    <!-- ENFORCE ENGLISH -->
+                    <input type="text" id="spouseName" oninput="forceEnglish(this)" data-key-ph="ph_name" placeholder="Name" style="width:100%; padding:10px; display:none; margin-top:8px; border:1px solid #ddd; border-radius:8px;">
+                </div>
+
+                <div class="guest-option">
+                    <div class="guest-header">
+                        <input type="checkbox" id="checkKidsBelow" onchange="calculateTotal()">
+                        <label for="checkKidsBelow"><span data-key="kidBLabel">Below 5 Years Kids Name</span> - Free</label>
+                    </div>
+                    <!-- ENFORCE ENGLISH -->
+                    <input type="text" id="kidsBelowName" oninput="forceEnglish(this)" data-key-ph="ph_names" placeholder="Names" style="width:100%; padding:10px; display:none; margin-top:8px; border:1px solid #ddd; border-radius:8px;">
+                </div>
+
+                <div class="guest-option">
+                    <div class="guest-header">
+                        <input type="checkbox" id="checkKidsAbove" onchange="calculateTotal()">
+                        <label for="checkKidsAbove"><span data-key="kidALabel">Above 5 Years Kids Name</span> - <span id="dispKidFee">300</span>৳</label>
+                    </div>
+                    <div id="kidsAboveBox" style="display:none; margin-top:8px;">
+                        <!-- ENFORCE ENGLISH -->
+                        <input type="text" id="kidsAboveName" oninput="forceEnglish(this)" data-key-ph="ph_names" placeholder="Names" style="width:100%; padding:10px; margin-bottom:5px; border:1px solid #ddd; border-radius:8px;">
+                        <select id="kidsAboveQty" onchange="calculateTotal()" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
+                            <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="guest-option" style="border: 2px solid #a29bfe;">
+                    <div class="guest-header" style="justify-content: space-between;">
+                        <label style="font-weight:700; color:#2d3436;" data-key="tshirtLabel"><i class="fas fa-tshirt"></i> T-Shirt Size</label>
+                        <select id="payTshirt" style="padding: 5px 15px; border-radius: 5px; border: 1px solid #ccc; outline:none; font-weight:bold; background:#f1f2f6;">
+                            <option value="" data-key="select">Select</option>
+                            <option value="M">M</option>
+                            <option value="L">L</option>
+                            <option value="XL">XL</option>
+                            <option value="XXL">XXL</option>
+                            <option value="XXXL">XXXL</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="total-box">
+                    <small data-key="totalFee">মোট ফি</small>
+                    <h2>Total: <span id="displayTotal">0</span> ৳</h2>
+                </div>
+
+                <div class="form-group" style="margin-top:15px;">
+                    <label data-key="payMethod"><i class="fas fa-wallet"></i> পেমেন্ট মেথড <span style="color:red">*</span></label>
+                    <select id="payMethod">
+                        <option value="" data-key="select">Select</option>
+                        <!-- Options generated by JS -->
+                    </select>
+                </div>
+                
+                <div id="senderInputs" style="display:block;">
+                    <!-- ENFORCE ENGLISH -->
+                    <div class="form-group"><label data-key="senderNo"><i class="fas fa-paper-plane"></i> সেন্ডার নম্বর <span style="color:red">*</span></label><input type="tel" id="senderPhone" oninput="forceEnglish(this)" placeholder="যে নম্বর থেকে টাকা পাঠিয়েছেন"></div>
+                    <button id="confirmPayBtn" class="btn" data-key="confirmBtn">নিশ্চিত করুন</button>
+                </div>
+
+                <button onclick="hidePaymentForm()" class="btn back-btn" data-key="backBtn"><i class="fas fa-arrow-left"></i> ফিরে যান</button>
+            </div>
+
+            <!-- LOGOUT BUTTON (UPDATED) -->
+            <button onclick="logoutUser()" class="logout-btn" id="logoutBtn" style="background:linear-gradient(to right, #ff416c, #ff4b2b); color:white; width:100%; padding:12px; border:none; border-radius:12px; display:none; margin-top:20px; font-weight:700; box-shadow: 0 5px 15px rgba(255, 65, 108, 0.4); cursor:pointer;" data-key="logout"><i class="fas fa-sign-out-alt"></i> লগআউট</button>
+        </div>
+    </div>
+
+    <!-- DEVELOPER SECTION -->
+    <div class="dev-footer">
+        <img src="https://i.ibb.co.com/0y9W4G0B/IMG-20260112-194542.jpg" class="dev-logo">
+        <div class="dev-name">Developed by 🌟 PIYASH 🌟</div>
+       <div class="dev-batch">Batch: 2018</div>
+    <div class="contact-label" style="font-size:12px; margin-bottom:10px; opacity:0.8;">Contact Us</div>
+        <div class="social-icons">
+            <a href="https://www.facebook.com/piyashhasan.ph" class="social-btn fb-bg"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://wa.me/+8801325428923" class="social-btn wa-bg"><i class="fab fa-whatsapp"></i></a>
+            <a href="https://t.me/piyashhasan_ph564" class="social-btn tg-bg"><i class="fab fa-telegram-plane"></i></a>
+        </div>
+    </div>
+
+    <!-- HIDDEN CARD CONTAINER (OFF-SCREEN) -->
+    <div style="position: absolute; left: -9999px; top: 0; overflow: hidden;">
+        <div id="final-card">
+            <!-- Background Image -->
+            <img id="bg-layer" crossorigin="anonymous" src="https://i.ibb.co.com/cXY4Jkqf/Congratulation-20260115-131216-0000.png" alt="Background">
+
+            <!-- Dynamic Content -->
+            <img id="user-pic" src="" crossorigin="anonymous">
+            
+            <div class="name-badge" id="outName">Name Here</div>
+            
+            <div class="info-text">
+                <div class="batch-style">BATCH : <span id="outBatch">2018</span></div>
+                <div class="sl-style">Registration SL : <span id="outSL">01</span></div>
+            </div>
+
+            <div class="date-style">Date: <span id="outDate"></span></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, query, where, updateDoc, doc, serverTimestamp, getDoc, orderBy, limit, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+  apiKey: "AIzaSyA3HzAAEF42fE_siFSVCHKmg2Ir0HfI66g",
+  authDomain: "p-chat-b6aae.firebaseapp.com",
+  projectId: "p-chat-b6aae",
+  storageBucket: "p-chat-b6aae.firebasestorage.app",
+  messagingSenderId: "23194469942",
+  appId: "1:23194469942:web:0f2f7774d6fbf4570bba97"
+};
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const imgbbAPI = "d685822691566e39accb630d6ef7a6d9";
+
+        let currentUserDocId = null;
+        let currentConfig = { 
+            self_fee: 1000, spouse_fee: 500, kid_fee: 300, accounts: {}, payment_active: true,
+            card_download_fee: 5, card_notice_text: "Demo Notice: Pay 5 Tk to Download",
+            card_download_active: false // Added Card Toggle Default
+        }; 
+        let currentLang = 'bn';
+        let currentUserStatus = 'New';
+        let currentUserData = {}; // Store full user object
+
+    window.forceEnglish = function(element) {
+        const regex = /[^\x00-\x7F]/g; 
+        if(regex.test(element.value)) {
+            element.value = element.value.replace(regex, '');
+            Swal.fire({
+                toast: true,
+                icon: 'warning',
+                title: 'দুঃখিত! শুধুমাত্র ইংরেজি অক্ষর ব্যবহার করুন।',
+                position: 'top',
+                showConfirmButton: false,
+                timer: 2000,
+                timerProgressBar: true,
+                background: '#fff3cd',
+                color: '#856404'
+            });
+        }
+    }
+
+        window.showAlert = function(title, text, icon) {
+            Swal.fire({
+                title: title,
+                text: text,
+                icon: icon,
+                confirmButtonText: 'OK',
+                background: '#fff',
+                confirmButtonColor: '#764ba2',
+                backdrop: `rgba(0,0,0,0.4)`
+            });
+        }
+
+        // --- GLOBAL COPY FUNCTION ---
+        window.copyToClipboard = function(elementId) {
+            const textToCopy = document.getElementById(elementId).innerText.trim();
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                const Toast = Swal.mixin({
+                    toast: true, position: 'top', showConfirmButton: false, timer: 1500,
+                    background: '#2ecc71', color: '#fff'
+                });
+                Toast.fire({ icon: 'success', title: 'Copied!' });
+            });
+        }
+
+        // --- AUTO LOGIN CHECK ON LOAD ---
+        window.onload = async function() {
+            setTimeout(() => {
+                document.getElementById('fbPopup').style.display = 'flex';
+            }, 1000);
+
+            // CHECK LOCAL STORAGE
+            const savedUserId = localStorage.getItem("reunion_user_id");
+            if(savedUserId) {
+                // Show loading state if needed, or just fetch
+                try {
+                    const docRef = doc(db, "students", savedUserId);
+                    const docSnap = await getDoc(docRef);
+                    if (docSnap.exists()) {
+                        currentUserDocId = savedUserId;
+                        showProfile(docSnap.data());
+                    } else {
+                        localStorage.removeItem("reunion_user_id"); // Invalid ID
+                    }
+                } catch(e) {
+                    console.log("Auto login error:", e);
+                }
+            }
+        }
+
+        window.closePopup = function() {
+            document.getElementById('fbPopup').style.display = 'none';
+        }
+
+        window.logoutUser = function() {
+            localStorage.removeItem("reunion_user_id");
+            location.reload();
+        }
+
+        const langData = {
+            bn: {
+                welcome: "স্বাগতম!", login: "লগইন", register: "রেজিস্ট্রেশন",
+                mobile: "মোবাইল নম্বর", password: "পাসওয়ার্ড", loginBtn: "লগইন করুন",
+                name: "নাম (English)", batch: "ব্যাচ (SSC - English)", address: "বর্তমান ঠিকানা (English)", photo: "ছবি", regBtn: "রেজিস্ট্রেশন করুন",
+                batch_label: "SSC ব্যাচ:",
+                payBtn: "পেমেন্ট করুন", payDetails: "পেমেন্ট বিবরণ", totalFee: "মোট ফি",
+                payMethod: "পেমেন্ট মেথড", senderNo: "সেন্ডার নম্বর",
+                confirmBtn: "নিশ্চিত করুন", backBtn: "ফিরে যান", logout: "লগআউট", select: "সিলেক্ট করুন",
+                altMobile: "বিকল্প মোবাইল নম্বর (ঐচ্ছিক)", tshirtLabel: "টি-শার্ট সাইজ",
+                statReg: "নিবন্ধিত", statPaid: "পেমেন্ট করেছে", statCollect: "জমা হয়েছে", statGuest: "মোট অতিথি",
+                payInfo: "পেমেন্ট তথ্য", methodLabel: "মেথড:", senderLabel: "সেন্ডার নম্বর:", amountLabel: "টাকার পরিমাণ:",
+                guestInfo: "অতিথি তথ্য", spouseLabel: "স্বামী/স্ত্রী", 
+                kidALabel: "৫ বছরের বড় বাচ্চার নাম", kidBLabel: "৫ বছরের ছোট বাচ্চার নাম",
+                st_pending: "অপেক্ষা করুন", st_rejected: "বাতিল হয়েছে", st_approved: "অনুমোদিত", st_new: "পেমেন্ট বাকি",
+                ph_name: "নাম লিখুন (English)", ph_names: "নামগুলো লিখুন (English)",
+                alert_reg_ok: "রেজিস্ট্রেশন সফল!", alert_wait: "অপেক্ষা করুন...", alert_exists: "এই নম্বরে একাউন্ট আছে!",
+                alert_login_fail: "ভুল তথ্য!", alert_pay_ok: "পেমেন্ট সফলভাবে জমা হয়েছে!", alert_fill_all: "সব তথ্য দিন!",
+                alert_tshirt: "দয়া করে টি-শার্ট সাইজ সিলেক্ট করুন!",
+                alert_method_req: "দয়া করে পেমেন্ট মেথড সিলেক্ট করুন!",
+                alert_sender_req: "দয়া করে সেন্ডার নম্বর প্রদান করুন!",
+                btn_retry: "পুনরায় পেমেন্ট করুন", btnApproved: "সকল নিবন্ধিত অংশগ্রহণকারী"
+            },
+            en: {
+                welcome: "Welcome!", login: "Login", register: "Register",
+                mobile: "Mobile Number", password: "Password", loginBtn: "Login",
+                name: "Name (English)", batch: "Batch (SSC)", address: "Current Address (English)", photo: "Photo", regBtn: "Register",
+                batch_label: "SSC Batch:",
+                payBtn: "Payment Now", payDetails: "Payment Details", totalFee: "Total Fee",
+                payMethod: "Payment Method", senderNo: "Sender Number",
+                confirmBtn: "Confirm", backBtn: "Go Back", logout: "Logout", select: "Select",
+                altMobile: "Alternative Mobile Number (Optional)", tshirtLabel: "T-Shirt Size",
+                statReg: "Registered", statPaid: "Paid Users", statCollect: "Collected", statGuest: "Total Guests",
+                payInfo: "Payment Info", methodLabel: "Method:", senderLabel: "Sender No:", amountLabel: "Amount:",
+                guestInfo: "Guest Info", spouseLabel: "Spouse", 
+                kidALabel: "Above 5 Years Kids Name", kidBLabel: "Below 5 Years Kids Name",
+                st_pending: "Pending Approval", st_rejected: "Rejected", st_approved: "Approved", st_new: "Payment Due",
+                ph_name: "Enter Name (English)", ph_names: "Enter Names (English)",
+                alert_reg_ok: "Registration Successful!", alert_wait: "Please Wait...", alert_exists: "Number already exists!",
+                alert_login_fail: "Invalid Credentials!", alert_pay_ok: "Payment Submitted Successfully!", alert_fill_all: "Fill all details!",
+                alert_tshirt: "Please select T-Shirt Size!",
+                alert_method_req: "Please select a Payment Method!",
+                alert_sender_req: "Please enter Sender Number!",
+                btn_retry: "Retry Payment", btnApproved: "All Registered Participants"
+                
+          }
+        };
+
+        window.showApprovedBatches = async function() {
+            const modal = document.getElementById('batchModal');
+            const container = document.getElementById('batchListContainer');
+            modal.style.display = 'flex';
+            container.innerHTML = '<p style="grid-column:1/-1; color:#888;">Loading...</p>';
+
+            try {
+                const q = query(collection(db, "students"), where("payment_status", "==", "Approved"));
+                const snap = await getDocs(q);
+                const batchCounts = {};
+
+                snap.forEach(d => {
+                    const b = d.data().batch;
+                    batchCounts[b] = (batchCounts[b] || 0) + 1;
+                });
+
+                container.innerHTML = "";
+                const batches = Object.keys(batchCounts).sort();
+                
+                if(batches.length === 0) {
+                    container.innerHTML = '<p style="grid-column:1/-1; color:#666;">No approved batches yet.</p>';
+                    return;
+                }
+
+                batches.forEach(b => {
+                    container.innerHTML += `
+                        <div class="batch-folder">
+                            <i class="fas fa-folder"></i>
+                            <h4>Batch ${b}</h4>
+                            <span>${batchCounts[b]} Approved</span>
+                        </div>
+                    `;
+                });
+            } catch(e) {
+                console.error(e);
+                container.innerHTML = '<p style="grid-column:1/-1; color:red;">Error loading batches.</p>';
+            }
+        }
+
+        window.toggleLanguage = function() {
+            currentLang = currentLang === 'bn' ? 'en' : 'bn';
+            document.getElementById('langToggle').innerHTML = currentLang === 'bn' ? '<i class="fas fa-globe"></i> EN' : '<i class="fas fa-globe"></i> BN';
+            updateTexts();
+            updateStatusText();
+        }
+
+        function updateTexts() {
+            document.querySelectorAll('[data-key]').forEach(el => {
+                const key = el.getAttribute('data-key');
+                if(langData[currentLang][key]) {
+                    if(el.querySelector('i')) {
+                        const icon = el.querySelector('i').outerHTML;
+                        el.innerHTML = icon + " " + langData[currentLang][key];
+                    } else {
+                        el.innerText = langData[currentLang][key];
+                    }
+                }
+            });
+            document.querySelectorAll('[data-key-ph]').forEach(el => {
+                const key = el.getAttribute('data-key-ph');
+                if(langData[currentLang][key]) el.placeholder = langData[currentLang][key];
+            });
+        }
+
+        function updateStatusText() {
+            const statusBox = document.getElementById('statusContainer');
+            const payBtn = document.getElementById('showPayFormBtn');
+            const msgClosed = document.getElementById('paymentClosedMsg');
+            
+            // CARD BUTTON & MSG
+            const dlBtn = document.getElementById('downloadCardBtn');
+            const cardMsg = document.getElementById('cardSystemClosedMsg');
+            
+            if (currentUserStatus === 'Approved') statusBox.innerText = langData[currentLang].st_approved;
+            else if (currentUserStatus === 'Rejected') statusBox.innerText = langData[currentLang].st_rejected;
+            else if (currentUserStatus === 'Pending') statusBox.innerText = langData[currentLang].st_pending;
+            else statusBox.innerText = langData[currentLang].st_new;
+
+            // --- CHECK ADMIN SWITCH FOR CARD ---
+            if (currentUserStatus === 'Approved') {
+                if (currentConfig.card_download_active === true) {
+                    dlBtn.style.display = 'inline-block';
+                    cardMsg.style.display = 'none';
+                } else {
+                    dlBtn.style.display = 'none';
+                    cardMsg.style.display = 'block';
+                }
+            } else {
+                dlBtn.style.display = 'none';
+                cardMsg.style.display = 'none';
+            }
+
+            if (currentUserStatus === 'New' || currentUserStatus === 'Rejected') {
+                if (currentConfig.payment_active === false) {
+                    payBtn.style.display = 'none';
+                    msgClosed.style.display = 'block';
+                } else {
+                    payBtn.style.display = 'block';
+                    msgClosed.style.display = 'none';
+                    payBtn.innerHTML = currentUserStatus === 'Rejected' ? `<i class="fas fa-redo"></i> ${langData[currentLang].btn_retry}` : `<i class="fas fa-credit-card"></i> ${langData[currentLang].payBtn}`;
+                }
+            } else {
+                payBtn.style.display = 'none';
+                msgClosed.style.display = 'none';
+            }
+        }
+
+        async function fetchConfig() {
+            try {
+                const docSnap = await getDoc(doc(db, "config", "fees"));
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    currentConfig = { ...currentConfig, ...data };
+                    
+                    document.getElementById('dispSpouseFee').innerText = currentConfig.spouse_fee;
+                    document.getElementById('dispKidFee').innerText = currentConfig.kid_fee;
+                    document.getElementById('displayTotal').innerText = currentConfig.self_fee;
+
+                    // Update Card Fee Modal Details from Admin Config
+                    document.getElementById('adminNoticeText').innerText = currentConfig.card_notice_text || "ডেমো নোটিশ: কার্ড ডাউনলোডের জন্য ৫ টাকা ফি প্রযোজ্য।";
+                    document.getElementById('adminFeeAmount').innerText = currentConfig.card_download_fee || "5";
+                    
+                    // --- FIX FOR BKASH NUMBER DISPLAY ---
+                    // Now prioritizing the 'admin_bkash_number' field over payment methods
+                    let targetNumber = "01xxxxxxxxx";
+                    if (currentConfig.admin_bkash_number) {
+                        targetNumber = currentConfig.admin_bkash_number;
+                    } else if (currentConfig.accounts && currentConfig.accounts.bKash && currentConfig.accounts.bKash !== "Enabled") {
+                        // Only use accounts.bKash if it's not just a status flag like "Enabled"
+                        targetNumber = currentConfig.accounts.bKash;
+                    }
+                    
+                    document.getElementById('adminBkashNumber').innerText = targetNumber;
+
+                    const select = document.getElementById('payMethod');
+                    select.innerHTML = `<option value="" data-key="select">Select</option>`;
+                    if (currentConfig.accounts) {
+                        for (const [methodName, number] of Object.entries(currentConfig.accounts)) {
+                            const option = document.createElement('option');
+                            option.value = methodName;
+                            option.innerText = methodName;
+                            select.appendChild(option);
+                        }
+                    }
+                    updateTexts();
+                    if(currentUserDocId) updateStatusText(); 
+                }
+            } catch(e) { console.log("Config Error", e); }
+        }
+        fetchConfig();
+
+        // --- UPDATED CARD FEE LOGIC (AUTOMATED + OCR) ---
+        window.closeCardFeeModal = function() {
+            document.getElementById('cardFeeModal').style.display = 'none';
+        }
+
+        // 1. SMART PASTE HANDLER
+        document.getElementById('cardTrxInput').addEventListener('input', function(e) {
+            const val = e.target.value;
+            // Regex to find TrxID (starts with 8-10 chars, alphanum)
+            // bKash usually starts with digits or letters, mixed.
+            // Let's look for pattern like "TrxID XXXXXXX" or just long strings if pasted
+            
+            if (val.length > 20) { // Likely a full SMS paste
+                const match = val.match(/(?:TrxID|TxnID|Trans ID)[\s:]*([A-Z0-9]+)/i);
+                if (match && match[1]) {
+                    e.target.value = match[1].toUpperCase();
+                    Swal.fire({
+                        toast: true, position: 'top', icon: 'success', 
+                        title: 'TrxID Auto-Extracted!', showConfirmButton: false, timer: 1500
+                    });
+                }
+            }
+        });
+
+        // 2. TRIGGER CAMERA
+        window.triggerCamera = function() {
+            document.getElementById('scanInput').click();
+        }
+
+        // 3. HANDLE SCREENSHOT (UPDATED WITH NEW FULL SCREEN LOADER)
+        window.handleScreenshot = async function(input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                
+                // Show Custom Full Screen Loader
+                const loader = document.getElementById('black-loading-screen');
+                const pctText = document.getElementById('ocr-percentage');
+                loader.style.display = 'flex';
+                pctText.innerText = "0%";
+
+                try {
+                    // Create worker with logger
+                    const worker = await Tesseract.createWorker({
+                        logger: m => {
+                            if (m.status === 'recognizing text') {
+                                const pct = Math.round(m.progress * 100);
+                                pctText.innerText = pct + '%';
+                            }
+                        }
+                    });
+                    
+                    // Initialization for v4 (Stable for this CDN)
+                    await worker.loadLanguage('eng');
+                    await worker.initialize('eng');
+                    
+                    const { data: { text } } = await worker.recognize(file);
+                    await worker.terminate();
+
+                    console.log("OCR Output:", text); // Debugging
+
+                    // Hide Loader
+                    loader.style.display = 'none';
+
+                    // Enhanced Regex to find TrxID
+                    // 1. Look for explicit labels: TrxID, TxnID, Trans ID followed by alphanumeric
+                    // 2. Or look for a standalone uppercase alphanumeric string of 8-12 chars (common bKash TrxID length)
+                    // Clean text first: remove spaces inside potential IDs
+                    const cleanText = text.replace(/\s/g, " "); // Normalize spaces
+                    
+                    // Match "TrxID XXXXXXX" type patterns
+                    let match = cleanText.match(/(?:TrxID|TxnID|Trans ID|ID)[\s:.]*([A-Z0-9]{8,15})/i);
+                    
+                    if (!match) {
+                        // Fallback: Find 8-12 char uppercase alphanumeric words that might be the ID
+                        // bKash IDs often start with digits or characters, usually 10 chars.
+                        // Example: 9G7H76...
+                        const words = cleanText.split(/[\s,]+/);
+                        for(let w of words) {
+                            // Remove special chars
+                            let cleanW = w.replace(/[^A-Z0-9]/gi, '');
+                            // Check if length is 9-12 and contains at least one digit and one letter (common structure)
+                            if(cleanW.length >= 8 && cleanW.length <= 12 && /[A-Z]/.test(cleanW) && /[0-9]/.test(cleanW)) {
+                                match = [null, cleanW]; // Simulate match array
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if (match && match[1]) {
+                        document.getElementById('cardTrxInput').value = match[1].toUpperCase();
+                        Swal.fire({
+                            icon: 'success', title: 'Found!',
+                            text: `TrxID: ${match[1].toUpperCase()}`,
+                            timer: 1500, showConfirmButton: false
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error', title: 'Failed',
+                            text: 'Could not find TrxID automatically. Please type it.'
+                        });
+                    }
+
+                } catch (err) {
+                    console.error(err);
+                    loader.style.display = 'none';
+                    Swal.fire({ icon: 'error', title: 'Error', text: 'Scanning failed. Try again.' });
+                }
+                
+                // Reset input
+                input.value = '';
+            }
+        }
+
+        // 4. VERIFY PAYMENT (MAIN LOGIC)
+        window.verifyCardPayment = async function() {
+            const trxId = document.getElementById('cardTrxInput').value.trim().toUpperCase();
+            const msgBox = document.getElementById('cardVerifyMsg');
+            const verifyBtn = document.getElementById('verifyCardBtn');
+            const requiredAmount = parseFloat(currentConfig.card_download_fee || 5);
+
+            if(trxId.length < 5) {
+                msgBox.style.color = 'red';
+                msgBox.innerText = "❌ দয়া করে সঠিক TrxID দিন।";
+                return;
+            }
+
+            verifyBtn.disabled = true;
+            verifyBtn.innerText = "Checking...";
+            msgBox.innerText = "";
+
+            try {
+                // 1. DUPLICATE CHECK
+                const usedCheck = await getDoc(doc(db, "used_trx", trxId));
+                if (usedCheck.exists()) {
+                    throw new Error("এই TrxID টি ইতিমধ্যে ব্যবহার করা হয়েছে!");
+                }
+
+                // 2. CHECK SMS FORWARDER DATA
+                const smsQuery = query(collection(db, "sms"), limit(100)); 
+                const smsSnap = await getDocs(smsQuery);
+
+                let found = false;
+                let foundAmount = 0;
+
+                for (const docSnap of smsSnap.docs) {
+                    const smsData = docSnap.data();
+                    const body = (smsData.body || smsData.message || "").toUpperCase();
+
+                    if (body.includes(trxId)) {
+                        const amountMatch = body.match(/Tk\s*([\d.]+)/i);
+                        if (amountMatch) {
+                            foundAmount = parseFloat(amountMatch[1]);
+                            if (foundAmount >= requiredAmount) {
+                                found = true;
+                                break; 
+                            }
+                        }
+                    }
+                }
+
+                if(found) {
+                    // Success
+                    await updateDoc(doc(db, "students", currentUserDocId), {
+                        card_fee_paid: true,
+                        card_trx_id: trxId
+                    });
+
+                    await setDoc(doc(db, "used_trx", trxId), {
+                        used_by: currentUserDocId,
+                        amount: foundAmount,
+                        timestamp: serverTimestamp()
+                    });
+                    
+                    currentUserData.card_fee_paid = true;
+                    currentUserData.card_trx_id = trxId;
+
+                    msgBox.style.color = 'green';
+                    msgBox.innerText = "✅ ভেরিফিকেশন সফল! ডাউনলোড শুরু হচ্ছে...";
+                    
+                    setTimeout(() => {
+                        closeCardFeeModal();
+                        realDownloadCard(); 
+                    }, 1500);
+
+                } else {
+                    msgBox.style.color = 'red';
+                    msgBox.innerText = `❌ পেমেন্ট পাওয়া যায়নি অথবা টাকার পরিমাণ কম।`;
+                    verifyBtn.disabled = false;
+                    verifyBtn.innerText = "Verify & Download";
+                }
+
+            } catch(e) {
+                msgBox.style.color = 'red';
+                msgBox.innerText = "❌ " + e.message;
+                verifyBtn.disabled = false;
+                verifyBtn.innerText = "Verify & Download";
+            }
+        }
+
+        // --- AUTO LOGIN AFTER REGISTRATION ---
+        document.getElementById('regForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('regBtn');
+            btn.disabled = true; btn.innerText = langData[currentLang].alert_wait;
+            
+            const file = document.getElementById('regPhoto').files[0];
+            const formData = new FormData(); formData.append("image", file);
+
+            try {
+                const q = query(collection(db, "students"), where("phone", "==", document.getElementById('regPhone').value));
+                if (!(await getDocs(q)).empty) throw new Error(langData[currentLang].alert_exists);
+
+                const imgRes = await fetch(`https://api.imgbb.com/1/upload?key=${imgbbAPI}`, { method: "POST", body: formData });
+                const imgData = await imgRes.json();
+                
+                const studentData = {
+                    name: document.getElementById('regName').value,
+                    batch: document.getElementById('regBatch').value,
+                    phone: document.getElementById('regPhone').value,
+                    alt_phone: document.getElementById('regAltPhone').value,
+                    address: document.getElementById('regAddress').value,
+                    password: document.getElementById('regPass').value,
+                    photo: imgData.data.url,
+                    payment_status: "New", total_amount: 0, createdAt: serverTimestamp(),
+                    card_fee_paid: false // Initial status
+                };
+
+                const docRef = await addDoc(collection(db, "students"), studentData);
+                
+                showAlert('Success!', langData[currentLang].alert_reg_ok, 'success');
+                
+                // SAVE SESSION ID
+                localStorage.setItem("reunion_user_id", docRef.id);
+                
+                currentUserDocId = docRef.id;
+                showProfile(studentData); 
+                
+            } catch (err) { 
+                showAlert('Error!', err.message, 'error'); 
+                btn.disabled = false; btn.innerText = langData[currentLang].regBtn; 
+            }
+        });
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('loginBtn');
+            btn.innerText = langData[currentLang].alert_wait;
+            try {
+                const q = query(collection(db, "students"), where("phone", "==", document.getElementById('loginPhone').value));
+                const snap = await getDocs(q);
+                let user = null;
+                let uId = null;
+                snap.forEach(d => { 
+                    if(d.data().password === document.getElementById('loginPass').value) { 
+                        user = d.data(); 
+                        uId = d.id;
+                        currentUserDocId = d.id; 
+                    } 
+                });
+                
+                if (user) {
+                    // SAVE SESSION ID
+                    localStorage.setItem("reunion_user_id", uId);
+                    showProfile(user);
+                }
+                else showAlert('Failed', langData[currentLang].alert_login_fail, 'error');
+            } catch (err) { showAlert('Error', 'Something went wrong', 'error'); }
+            btn.innerText = langData[currentLang].loginBtn;
+        });
+
+        function showProfile(user) {
+            currentUserData = user; // Save for download logic
+            document.getElementById('authContainer').style.display = 'none';
+            document.getElementById('profileView').style.display = 'block';
+            document.getElementById('logoutBtn').style.display = 'block';
+            document.querySelector('.approved-batch-btn').style.display = 'none';
+
+            document.getElementById('viewName').innerText = user.name;
+            document.getElementById('viewBatch').innerText = user.batch;
+            document.getElementById('viewPhone').innerText = user.phone;
+            
+            if(user.alt_phone) {
+                document.getElementById('rowAltPhone').style.display = 'flex';
+                document.getElementById('viewAltPhone').innerText = user.alt_phone;
+            } else {
+                document.getElementById('rowAltPhone').style.display = 'none';
+            }
+
+            document.getElementById('viewAddress').innerText = user.address;
+            document.getElementById('viewPhoto').src = user.photo;
+
+            const statusBox = document.getElementById('statusContainer');
+            const fullDetails = document.getElementById('approvedDetails');
+            const slDisplay = document.getElementById('slNumberDisplay');
+
+            if (user.payment_status === "Approved") currentUserStatus = 'Approved';
+            else if (user.payment_status === "Rejected") currentUserStatus = 'Rejected';
+            else if (user.total_amount > 0) currentUserStatus = 'Pending';
+            else currentUserStatus = 'New';
+
+            updateStatusText();
+
+            if (currentUserStatus === "Approved") {
+                statusBox.className = "status-badge status-success";
+                
+                fullDetails.style.display = 'block';
+                slDisplay.style.display = 'inline-block';
+                slDisplay.innerText = "SL: #" + user.serial_number;
+
+                document.getElementById('vMethod').innerText = user.payment_method;
+                document.getElementById('vSender').innerText = user.sender_number;
+                document.getElementById('vAmount').innerText = user.total_amount + " ৳";
+                
+                document.getElementById('vTshirt').innerText = user.tshirt || "N/A";
+
+                let hasGuest = false;
+                if(user.guest_info) {
+                    if(user.guest_info.spouse && user.guest_info.spouse !== "No") { document.getElementById('rowSpouse').style.display='flex'; document.getElementById('vSpouse').innerText=user.guest_info.spouse; hasGuest=true; }
+                    if(user.guest_info.kid_above && user.guest_info.kid_above !== "No") { document.getElementById('rowKidA').style.display='flex'; document.getElementById('vKidA').innerText=user.guest_info.kid_above; hasGuest=true; }
+                    if(user.guest_info.kid_below && user.guest_info.kid_below !== "No") { document.getElementById('rowKidB').style.display='flex'; document.getElementById('vKidB').innerText=user.guest_info.kid_below; hasGuest=true; }
+                }
+                if(!hasGuest) document.getElementById('vGuestBox').style.display = 'none';
+
+                fetchStats();
+
+            } else {
+                fullDetails.style.display = 'none';
+                slDisplay.style.display = 'none';
+                document.querySelectorAll('.stats-box').forEach(el => el.style.display = 'none'); 
+
+                if(currentUserStatus === "Rejected") statusBox.className = "status-badge status-rejected";
+                else if(currentUserStatus === "Pending") statusBox.className = "status-badge status-pending";
+                else statusBox.className = "status-badge status-pending"; 
+            }
+        }
+
+        // --- DOWNLOAD CARD FUNCTION ---
+        window.generateAndDownloadCard = function() {
+            if(currentUserStatus !== 'Approved') return;
+
+            // NEW: Check if card fee is paid
+            if(currentUserData.card_fee_paid !== true) {
+                // If not paid, show the Fee Modal
+                document.getElementById('cardFeeModal').style.display = 'flex';
+                return;
+            }
+
+            // If Paid, Proceed to Download
+            realDownloadCard();
+        }
+
+        function realDownloadCard() {
+            // 1. Populate Hidden Card Data
+            document.getElementById('outName').innerText = currentUserData.name;
+            document.getElementById('outBatch').innerText = currentUserData.batch;
+            document.getElementById('outSL').innerText = currentUserData.serial_number;
+            document.getElementById('user-pic').src = currentUserData.photo;
+            
+            // 2. Set Current Date
+            document.getElementById('outDate').innerText = new Date().toLocaleDateString('en-GB');
+
+            // 3. Show Loading Toast
+            const Toast = Swal.mixin({
+                toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, timerProgressBar: true,
+                didOpen: (toast) => { toast.addEventListener('mouseenter', Swal.stopTimer); toast.addEventListener('mouseleave', Swal.resumeTimer); }
+            });
+            Toast.fire({ icon: 'info', title: 'Generating Card...' });
+
+            // 4. Capture & Download
+            const cardElement = document.getElementById('final-card');
+            
+            // Wait a bit for image to set in DOM
+            setTimeout(() => {
+                html2canvas(cardElement, {
+                    scale: 3, 
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: null
+                }).then(canvas => {
+                    const link = document.createElement('a');
+                    link.download = `Reunion-Card-${currentUserData.batch}-${currentUserData.serial_number}.png`;
+                    link.href = canvas.toDataURL();
+                    link.click();
+                    Toast.fire({ icon: 'success', title: 'Downloaded!' });
+                }).catch(err => {
+                    console.error(err);
+                    showAlert('Error', 'Failed to generate card. Try again.', 'error');
+                });
+            }, 500);
+        }
+
+        async function fetchStats() {
+            try {
+                const q = query(collection(db, "students"));
+                const snapshot = await getDocs(q);
+                let totalReg = 0;
+                let totalPaid = 0;
+                let totalMoney = 0;
+                let totalGuests = 0;
+
+                snapshot.forEach(doc => {
+                    const u = doc.data();
+                    totalReg++;
+                    
+                    if(u.payment_status === "Approved") {
+                        totalPaid++;
+                        totalMoney += (parseInt(u.total_amount) || 0);
+
+                        if(u.guest_info) {
+                            if(u.guest_info.spouse && u.guest_info.spouse !== "No") totalGuests++;
+                            if(u.guest_info.kid_below && u.guest_info.kid_below !== "No") totalGuests++;
+                            if(u.guest_info.kid_above && u.guest_info.kid_above !== "No") {
+                                let match = u.guest_info.kid_above.match(/\((\d+)\)/);
+                                if(match) totalGuests += parseInt(match[1]);
+                                else totalGuests++;
+                            }
+                        }
+                    }
+                });
+
+                document.querySelectorAll('.stats-box').forEach(el => el.style.display = 'block');
+                document.getElementById('valRegistered').innerText = totalReg;
+                document.getElementById('valPaid').innerText = totalPaid;
+                document.getElementById('valCollected').innerText = totalMoney + " ৳";
+                document.getElementById('valGuest').innerText = totalGuests;
+
+            } catch(e) { console.log(e); }
+        }
+
+        // --- PAYMENT & CALCULATION ---
+        document.getElementById('showPayFormBtn').addEventListener('click', () => {
+            document.getElementById('mainIdCard').style.display = 'none';
+            document.getElementById('logoutBtn').style.display = 'none';
+            document.getElementById('paymentFormSection').style.display = 'block';
+            calculateTotal();
+        });
+
+        window.hidePaymentForm = function() {
+            document.getElementById('paymentFormSection').style.display = 'none';
+            document.getElementById('mainIdCard').style.display = 'block';
+            document.getElementById('logoutBtn').style.display = 'block';
+        };
+
+        window.calculateTotal = function() {
+            let total = currentConfig.self_fee;
+            const spCheck = document.getElementById('checkSpouse');
+            document.getElementById('spouseName').style.display = spCheck.checked ? 'block' : 'none';
+            if(spCheck.checked) total += currentConfig.spouse_fee;
+
+            const kbCheck = document.getElementById('checkKidsBelow');
+            document.getElementById('kidsBelowName').style.display = kbCheck.checked ? 'block' : 'none';
+
+            const kaCheck = document.getElementById('checkKidsAbove');
+            document.getElementById('kidsAboveBox').style.display = kaCheck.checked ? 'block' : 'none';
+            if(kaCheck.checked) total += (currentConfig.kid_fee * parseInt(document.getElementById('kidsAboveQty').value));
+
+            document.getElementById('displayTotal').innerText = total;
+            return total;
+        };
+
+        document.getElementById('confirmPayBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('confirmPayBtn');
+            const tshirtSize = document.getElementById('payTshirt').value;
+            const payMethod = document.getElementById('payMethod').value;
+            const senderPhone = document.getElementById('senderPhone').value;
+
+            // --- MANDATORY VALIDATIONS ---
+            if (!tshirtSize) {
+                showAlert('Missing Info', langData[currentLang].alert_tshirt, 'warning');
+                return;
+            }
+            if (payMethod === "" || !payMethod) {
+                showAlert('Missing Info', langData[currentLang].alert_method_req, 'warning');
+                return;
+            }
+            if (senderPhone.trim() === "") {
+                showAlert('Missing Info', langData[currentLang].alert_sender_req, 'warning');
+                return;
+            }
+
+            btn.disabled = true;
+            try {
+                const guests = {
+                    spouse: document.getElementById('checkSpouse').checked ? document.getElementById('spouseName').value : "No",
+                    kid_below: document.getElementById('checkKidsBelow').checked ? document.getElementById('kidsBelowName').value : "No",
+                    kid_above: document.getElementById('checkKidsAbove').checked ? `${document.getElementById('kidsAboveName').value} (${document.getElementById('kidsAboveQty').value})` : "No"
+                };
+
+                await updateDoc(doc(db, "students", currentUserDocId), {
+                    total_amount: calculateTotal(),
+                    sender_number: senderPhone,
+                    trx_id: "N/A", 
+                    payment_method: payMethod,
+                    tshirt: tshirtSize,
+                    target_number: "N/A", 
+                    guest_info: guests,
+                    payment_status: "Submitted", submitted_at: new Date()
+                });
+                
+                showAlert('Great!', langData[currentLang].alert_pay_ok, 'success'); 
+                
+                hidePaymentForm(); 
+                const updatedSnap = await getDoc(doc(db, "students", currentUserDocId));
+                showProfile(updatedSnap.data());
+                btn.disabled = false;
+
+            } catch (err) { 
+                console.error(err);
+                showAlert('Error', err.message, 'error');
+                btn.disabled = false; 
+            }
+        });
+
+        window.switchTab = function(t) {
+            document.getElementById('loginSection').classList.toggle('active', t==='login');
+            document.getElementById('registerSection').classList.toggle('active', t==='register');
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+        } 
+    </script>
+</body>
+</html>
