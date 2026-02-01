@@ -1,1616 +1,1542 @@
+<!-- START OF FILE index.html -->
+
 <!DOCTYPE html>
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>School Reunion User Panel</title>
-    <!-- FontAwesome for Premium Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Admin Panel 2026</title>
+    <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- SweetAlert2 for Premium Alerts -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <!-- Html2Canvas for ID Card Generation -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <!-- Tesseract.js for OCR (Image to Text) -->
-    <script src='https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js'></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- PDF LIBRARIES -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    
+    <!-- EXCEL LIBRARY -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', 'Hind Siliguri', sans-serif; }
         
-        body {
-            background: linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%);
-            background-image: linear-gradient(to top, #30cfd0 0%, #330867 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        body { 
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); 
             min-height: 100vh;
-            padding: 10px;
-            flex-direction: column;
-            font-weight: 500;
-        }
-
-        /* --- 1. NEW LOADING SCREEN (BLACK BACKGROUND) --- */
-        #black-loading-screen {
-            display: none; /* শুরুতে লুকানো থাকবে */
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #000000; /* একদম কালো */
-            z-index: 99999;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
+            padding-bottom: 90px; 
+            overflow-x: hidden; 
+            color: #333;
         }
         
-        .loading-text-style {
-            color: #ffffff;
-            font-size: 22px;
-            font-weight: 600;
-            font-family: sans-serif;
-            letter-spacing: 1px;
+        /* --- LOGIN STYLES --- */
+        #loginSection { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100vh; 
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); 
+            z-index: 9999; display: flex; justify-content: center; align-items: center; 
         }
+        .login-card { 
+            background: rgba(255, 255, 255, 0.95); 
+            padding: 40px 30px; border-radius: 20px; width: 90%; max-width: 380px; 
+            text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); 
+            animation: zoomUp 0.6s ease-out;
+        }
+        @keyframes zoomUp { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-        /* ডট এনিমেশন */
-        .dots::after {
-            content: '.';
-            animation: dotsAnim 1.5s steps(5, end) infinite;
-        }
-        @keyframes dotsAnim {
-            0%, 20% { content: '.'; }
-            40% { content: '..'; }
-            60% { content: '...'; }
-            80%, 100% { content: ''; }
-        }
-
-        /* --- SCHOOL NAME ANIMATION --- */
-        .school-title {
-            text-align: center;
-            color: #fff;
-            font-size: 22px;
-            font-weight: 700;
-            margin-bottom: 15px;
-            text-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            animation: bounceInDown 1.2s;
-            line-height: 1.3;
-        }
-        @keyframes bounceInDown {
-            0% { opacity: 0; transform: translateY(-200px); }
-            60% { opacity: 1; transform: translateY(30px); }
-            100% { transform: translateY(0); }
-        }
-
-        /* --- POPUP MODAL --- */
-        .popup-overlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7); z-index: 5000; justify-content: center; align-items: center; backdrop-filter: blur(8px);
-        }
-        .popup-box {
-            background: white; padding: 30px; border-radius: 20px; text-align: center; width: 90%; max-width: 320px;
-            animation: zoomUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.3); position: relative;
-        }
-        @keyframes zoomUp { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .login-card h2 { margin-bottom: 25px; color: #2c3e50; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
         
-        .popup-logo {
-            width: 90px; height: 90px; border-radius: 50%; object-fit: cover; margin-bottom: 15px; 
-            border: 4px solid #1877F2; box-shadow: 0 5px 15px rgba(24, 119, 242, 0.3);
+        .login-card input { 
+            width: 100%; padding: 15px; margin-bottom: 15px; 
+            border: 2px solid #eee; border-radius: 10px; outline: none; 
+            background: #f9f9f9; transition: 0.3s; font-weight: 500;
         }
-        .popup-box h3 { font-weight: 800; color: #1877F2; font-size: 20px; margin-bottom: 5px; }
-        .popup-box p { font-weight: 600; font-size: 14px; color: #555; margin-bottom: 20px; }
+        .login-card input:focus { border-color: #3498db; background: #fff; }
+
+        .login-btn { 
+            width: 100%; padding: 15px; 
+            background: linear-gradient(to right, #2193b0, #6dd5ed); 
+            color: white; border: none; border-radius: 10px; 
+            font-weight: 700; cursor: pointer; transition: 0.3s; text-transform: uppercase;
+            box-shadow: 0 5px 15px rgba(33, 147, 176, 0.4);
+        }
+        .login-btn:active { transform: scale(0.98); }
+        .login-error { color: #e74c3c; font-size: 13px; margin-top: 15px; display: none; font-weight: 600; }
         
-        .popup-btn {
-            background: #1877F2; color: white; border: none; padding: 12px 25px; border-radius: 50px;
-            margin-top: 10px; cursor: pointer; font-weight: 700; width: 100%; font-size: 15px;
-            box-shadow: 0 4px 10px rgba(24, 119, 242, 0.4); text-decoration: none; display: block;
-            transition: 0.3s;
+        /* --- ADMIN PANEL HEADER --- */
+        #adminPanelContent { display: none; }
+
+        .top-header { 
+            background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px);
+            color: white; padding: 20px; 
+            display: flex; justify-content: space-between; align-items: center; 
+            position: sticky; top: 0; z-index: 100; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
-        .popup-btn:active { transform: scale(0.95); }
-        .close-popup { 
-            margin-top: 10px; background: #dfe6e9; color: #636e72; box-shadow: none; 
+        .top-header h3 { font-size: 20px; margin: 0; font-weight: 700; letter-spacing: 0.5px; }
+        
+        .logout-btn { 
+            background: linear-gradient(to right, #eb3349, #f45c43); 
+            color: white; border: none; padding: 8px 18px; border-radius: 20px; 
+            font-size: 12px; cursor: pointer; font-weight: 700; 
+            box-shadow: 0 4px 10px rgba(235, 51, 73, 0.4);
+        }
+        
+        .section { display: none; padding: 20px; animation: fadeIn 0.4s ease; }
+        .section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Dashboard & Stats */
+        .search-box { 
+            background: white; padding: 8px; border-radius: 50px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1); margin-bottom: 20px; 
+            display: flex; align-items: center;
+        }
+        .search-box input { 
+            width: 100%; border: none; padding: 12px 20px; border-radius: 50px; 
+            outline: none; font-size: 14px; font-weight: 500;
+        }
+        
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 15px; }
+        .stats-full { margin-bottom: 25px; }
+        
+        .stat-card { 
+            background: rgba(255, 255, 255, 0.9); padding: 15px 10px; border-radius: 15px; 
+            text-align: center; box-shadow: 0 8px 20px rgba(0,0,0,0.15); transition: 0.3s;
+        }
+        .stat-card:hover { transform: translateY(-3px); background: #fff; }
+
+        .stat-card h3 { font-size: 22px; color: #2c3e50; margin: 0; font-weight: 800; }
+        .stat-card p { font-size: 10px; color: #7f8c8d; margin-top: 5px; font-weight: 700; text-transform: uppercase; }
+        
+        .stat-card:nth-child(1) h3 { color: #3498db; }
+        .stat-card:nth-child(2) h3 { color: #27ae60; }
+        .stat-card:nth-child(3) h3 { color: #9b59b6; }
+
+        .highlight-card { 
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); 
+            color: white; 
+        }
+        .highlight-card h3 { color: white !important; font-size: 28px; text-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .highlight-card p { color: rgba(255,255,255,0.9); font-size: 13px; }
+
+        /* Table */
+        .table-wrapper { 
+            background: white; border-radius: 15px; overflow: hidden; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2); margin-top: 15px; 
+        }
+        .table-header-text { 
+            padding: 15px 20px; font-weight: 700; color: #2c3e50; 
+            border-bottom: 2px solid #f0f2f5; background: #fff; 
+            font-size: 15px; display: flex; align-items: center; gap: 8px;
+        }
+        
+        table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #f1f1f1; font-size: 13px; vertical-align: middle; }
+        th { background: #f8f9fa; color: #7f8c8d; font-weight: 700; text-transform: uppercase; font-size: 11px; }
+        tr:last-child td { border-bottom: none; }
+        
+        .user-avatar { 
+            width: 45px; height: 45px; border-radius: 50%; object-fit: cover; 
+            border: 2px solid #eee; box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
+        }
+        
+        /* Badges */
+        .badge { padding: 5px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; display: inline-block; }
+        .bg-approved { background: #e8f5e9; color: #27ae60; border: 1px solid #c8e6c9; }
+        .bg-guest { background: #e3f2fd; color: #1976d2; border: 1px solid #bbdefb; margin-top: 4px; }
+        .bg-pending { background: #fff3e0; color: #e67e22; border: 1px solid #ffe0b2; }
+        .bg-new { background: #e8eaf6; color: #3f51b5; border: 1px solid #c5cae9; }
+        
+        /* View Button */
+        .view-btn {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); color: white; border: none;
+            width: 35px; height: 35px; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; box-shadow: 0 4px 10px rgba(37, 117, 252, 0.3); transition: 0.2s;
         }
 
-        /* --- APPROVED BATCH BUTTON --- */
-        .approved-batch-btn {
-            background: linear-gradient(45deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
-            color: #d90429;
-            padding: 8px 20px;
-            border-radius: 50px;
-            font-weight: 700;
-            border: none;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
-            margin-bottom: 15px;
-            cursor: pointer;
-            display: flex; align-items: center; gap: 8px; font-size: 12px; text-transform: uppercase;
+        /* Batches */
+        .batch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 15px; }
+        .batch-card { 
+            background: white; padding: 20px; border-radius: 15px; text-align: center; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1); cursor: pointer; transition: 0.3s; 
+            border: 1px solid transparent;
         }
+        .batch-card:hover { transform: translateY(-5px); border-color: #3498db; }
+        .batch-card h2 { font-size: 20px; color: #34495e; margin-bottom: 5px; font-weight: 800; }
+        .batch-card p { font-size: 11px; color: #95a5a6; font-weight: 600; }
 
-        /* --- CONTAINER STYLE --- */
-        .container {
-            background-color: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            width: 100%;
-            max-width: 360px;
-            padding: 20px;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            position: relative;
-            overflow: hidden;
-            animation: zoomIn 0.6s ease-out;
-            border: 1px solid rgba(255,255,255,0.5);
+        .approved-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+        .approved-header h3 { color: #fff; font-size: 18px; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        
+        .search-approved { 
+            padding: 10px 15px; border: none; border-radius: 30px; 
+            outline: none; font-size: 13px; width: 100%; max-width: 150px; 
+            transition: 0.3s; background: rgba(255,255,255,0.9); box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
-        @keyframes zoomIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
-        .lang-btn {
-            position: absolute; top: 15px; right: 15px; 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none; padding: 4px 10px; border-radius: 15px; cursor: pointer; 
-            font-weight: 600; font-size: 10px; color: #fff; z-index: 100;
-        }
-
-        /* --- TABS --- */
-        .tabs { 
-            display: flex; justify-content: space-between; margin-bottom: 15px; 
-            background: #eef2f5; padding: 4px; border-radius: 50px; 
-        }
-        .tab-btn { 
-            width: 50%; padding: 8px; border: none; background: none; 
-            font-size: 14px; font-weight: 600; cursor: pointer; color: #777; 
-            border-radius: 50px; transition: 0.3s; 
-        }
-        .tab-btn.active { 
-            background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
-            color: white; box-shadow: 0 2px 10px rgba(79, 172, 254, 0.4); 
-        }
-
-        .form-box { display: none; animation: fadeIn 0.5s; }
-        .form-box.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        /* --- FORM INPUTS (PREMIUM DESIGN) --- */
-        .form-group { margin-bottom: 12px; position: relative; }
-        .form-group label { 
-            display: block; margin-bottom: 5px; font-weight: 600; color: #444; font-size: 12px; 
+        .search-approved:focus { background: white; width: 180px; }
+        
+        /* EXCEL BUTTON STYLE */
+        .excel-btn {
+            background: linear-gradient(135deg, #1d976c 0%, #93f9b9 100%);
+            color: white; border: none; padding: 8px 15px; border-radius: 30px;
+            font-size: 12px; font-weight: 700; cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2); text-transform: uppercase;
             display: flex; align-items: center; gap: 5px;
         }
-        .form-group label i { color: #764ba2; font-size: 12px; }
-        
-        .form-group input, .form-group select { 
-            width: 100%; padding: 12px; 
-            border: 2px solid #e0e0e0; border-radius: 12px; 
-            font-size: 13px; font-weight: 500; color: #333; outline: none; transition: 0.3s; 
-            background: #fdfdfd; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
-        }
-        .form-group input:focus, .form-group select:focus { 
-            border-color: #4facfe; 
-            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.2);
-            background: #fff;
-        }
+        .excel-btn:hover { transform: translateY(-2px); }
+        .excel-btn i { font-size: 14px; }
 
-        /* --- BUTTONS --- */
-        .btn { 
-            width: 100%; padding: 12px; border: none; border-radius: 10px; 
-            font-size: 14px; font-weight: 700; cursor: pointer; transition: 0.3s; 
-            margin-top: 10px; color: white; 
-            background: linear-gradient(to right, #43e97b 0%, #38f9d7 100%); 
-            box-shadow: 0 5px 15px rgba(67, 233, 123, 0.3); 
-            text-transform: uppercase; letter-spacing: 1px;
+        .batch-stats-box {
+            display: flex; align-items: center; background: white;
+            padding: 8px 15px; border-radius: 50px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1); border: 2px solid #eee;
         }
-        .btn:active { transform: scale(0.98); }
-        #loginBtn { background: linear-gradient(to right, #fa709a 0%, #fee140 100%); box-shadow: 0 5px 15px rgba(250, 112, 154, 0.3); }
+        .stat-item-member, .stat-item-guest {
+            font-size: 12px; font-weight: 700; color: #555;
+            display: flex; align-items: center; gap: 5px;
+        }
+        .stat-item-guest { margin-left: 12px; padding-left: 12px; border-left: 2px solid #ddd; }
+        #bTotalMember { color: #2980b9; font-size: 16px; font-weight: 800; }
+        #bTotalGuest { color: #d35400; font-size: 16px; font-weight: 800; }
+
+        /* Settings */
+        .settings-box { 
+            background: white; padding: 20px; border-radius: 15px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin-bottom: 20px; 
+        }
+        .settings-box h4 { margin-bottom: 15px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
         
-        /* Profile Styles */
-        #profileView { display: none; text-align: center; }
-        .id-card { 
-            background: white; border-radius: 15px; overflow: hidden; position: relative; 
-            border: none; margin-bottom: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); 
+        .form-group label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 8px; color: #555; text-transform: uppercase; }
+        
+        .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        input:checked + .slider { background-color: #2ecc71; }
+        input:checked + .slider:before { transform: translateX(24px); }
+        .control-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+
+        .add-method-group { 
+            display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; 
+            background: #f8f9fa; padding: 15px; border-radius: 12px; border: 1px dashed #ccc; 
+        }
+        .add-method-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; outline: none; font-size: 13px; background: white; }
+        .add-btn { width: 100%; background: linear-gradient(to right, #11998e, #38ef7d); color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: 700; text-transform: uppercase; }
+        
+        .method-list-item { display: flex; justify-content: space-between; align-items: center; background: #fff; border: 1px solid #eee; padding: 12px; margin-bottom: 10px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .del-btn { color: #e74c3c; cursor: pointer; font-size: 16px; padding: 8px; background: #fce4ec; border-radius: 50%; transition: 0.2s; }
+
+        .input-group { display: flex; gap: 10px; align-items: center; }
+        .input-group input { width: 100%; flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 8px; outline: none; }
+        .mini-save-btn { background: #2c3e50; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 12px; }
+
+        /* Nav */
+        .bottom-nav { 
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            width: 95%; max-width: 450px; 
+            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);
+            display: flex; justify-content: space-around; padding: 12px 0; 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2); 
+            z-index: 1000; border-radius: 30px; 
+        }
+        .nav-item { text-align: center; color: #95a5a6; cursor: pointer; flex: 1; transition: 0.3s; position: relative; }
+        .nav-item i { font-size: 20px; margin-bottom: 2px; display: block; transition: 0.3s; }
+        .nav-item span { font-size: 10px; font-weight: 600; display: block; }
+        .nav-item.active { color: #3498db; }
+        .nav-item.active i { transform: translateY(-2px); }
+        
+        /* Modal */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 2000; padding: 20px; backdrop-filter: blur(5px); }
+        .modal-content { 
+            background: white; width: 100%; max-width: 360px; border-radius: 25px; 
+            overflow: hidden; position: relative; 
+            box-shadow: 0 25px 50px rgba(0,0,0,0.4); 
+            animation: zoomUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex; flex-direction: column; max-height: 85vh; 
         }
         
-        /* --- COVER BG --- */
-        .cover-bg { 
-            min-height: 140px;
+        .close-modal { position: absolute; top: 15px; right: 15px; font-size: 24px; cursor: pointer; color: white; z-index: 10; opacity: 0.8; }
+        .profile-header { 
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-            display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
-            padding: 15px; align-items: center;
-            border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;
+            padding: 35px 20px 25px; text-align: center; color: white; flex-shrink: 0; 
         }
+        /* --- PROFILE IMAGE & BUTTON CONTAINER --- */
+.profile-img-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+    position: relative;
+}
 
-        .stats-box {
-            display: none; background: rgba(255, 255, 255, 0.2);
-            border-radius: 8px; padding: 8px 5px; text-align: center; color: white;
-            backdrop-filter: blur(5px); width: 100%; border: 1px solid rgba(255,255,255,0.3);
-        }
-        .stats-count { font-size: 16px; font-weight: 800; display: block; }
-        .stats-label { font-size: 9px; text-transform: uppercase; font-weight: 700; opacity: 0.9; }
+.profile-pic { 
+    width: 100px; 
+    height: 100px; 
+    border-radius: 50%; 
+    border: 4px solid rgba(255,255,255,0.3); 
+    object-fit: cover; 
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2); 
+    margin-bottom: 8px; /* ছবির নিচে একটু ফাঁকা */
+}
 
-        .profile-img-container { 
-            width: 100px; height: 100px; margin: -40px auto 5px;
-            border-radius: 50%; background: white; padding: 4px; 
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2); position: relative; z-index: 10; 
-        }
-        .profile-img-container img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
-        
-        .user-name { font-size: 20px; color: #2d3436; font-weight: 800; margin-bottom: 2px; }
-        .user-batch { color: #636e72; font-size: 13px; font-weight: 600; margin-bottom: 5px; display: block;}
-        
-        .sl-number { 
-            font-weight: 800; color: #0984e3; font-size: 14px; margin-bottom: 10px; 
-            display: none; background: #e1f5fe; padding: 4px 12px; border-radius: 20px; 
-        }
+.save-img-btn {
+    background: rgba(255, 255, 255, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    color: white;
+    padding: 5px 12px;
+    border-radius: 15px;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 600;
+    display: flex; /* শুরুতে hidden থাকবে, JS দিয়ে দেখাবো */
+    align-items: center;
+    gap: 5px;
+    transition: 0.3s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
 
-        .status-badge { display: inline-block; padding: 6px 15px; border-radius: 20px; font-size: 11px; font-weight: 700; margin-bottom: 15px; text-transform: uppercase; }
-        .status-pending { background: #ffeaa7; color: #d35400; }
-        .status-success { background: #55efc4; color: #006266; }
-        .status-rejected { background: #fab1a0; color: #c0392b; }
-
-        /* DOWNLOAD BUTTON STYLE */
-        .download-btn {
-            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-            color: white; border: none; padding: 6px 12px;
-            border-radius: 20px; font-size: 12px; font-weight: 600;
-            cursor: pointer; margin-left: 10px; display: none;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
-            animation: pulse 2s infinite;
-        }
-
-        .full-details { display: none; text-align: left; padding: 0 20px 20px; animation: fadeIn 0.5s; }
-        .detail-row { display: flex; justify-content: space-between; border-bottom: 1px dashed #dfe6e9; padding: 10px 0; font-size: 13px; }
-        .detail-row span { font-weight: 600; color: #636e72; display: flex; align-items: center; gap: 5px;}
-        .detail-row strong { font-weight: 700; color: #2d3436; text-align: right; }
-        .detail-title { 
-            background: #f1f2f6; padding: 8px 12px; font-weight: 800; font-size: 12px; 
-            color: #2f3542; margin-top: 15px; border-radius: 6px; text-transform: uppercase;
-            border-left: 3px solid #764ba2;
-        }
-
-        /* Copy Button Style */
-        .copy-btn {
-            cursor: pointer; color: #6c5ce7; margin-left: 8px; font-size: 14px;
-            transition: 0.2s;
-        }
-        .copy-btn:active { transform: scale(0.9); }
-
-        /* Payment Form */
-        #paymentFormSection { display: none; text-align: left; background: #fff; padding: 5px; animation: fadeIn 0.3s; }
-        
-        .guest-option { 
-            background: #fff; padding: 12px; border-radius: 12px; margin-bottom: 10px; 
-            border: 1px solid #eee; box-shadow: 0 4px 10px rgba(0,0,0,0.03);
-            transition: 0.2s;
-        }
-        .guest-option:hover { border-color: #a29bfe; }
-
-        .guest-header { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; font-weight: 700; color: #444; font-size: 13px; }
-        .guest-header input[type="checkbox"] { width: 18px; height: 18px; accent-color: #6c5ce7; cursor: pointer; }
-        
-        .total-box { 
-            background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%); 
-            padding: 15px; text-align: center; border-radius: 12px; margin: 15px 0; 
-            color: white; box-shadow: 0 5px 15px rgba(102, 166, 255, 0.4); 
-        }
-        .total-box h2 { color: white; margin: 0; font-weight: 800; font-size: 24px; }
-        
-        .pay-now-btn { 
-            background: linear-gradient(to right, #ff512f, #dd2476); 
-            color: white; width: 100%; padding: 14px; border: none; border-radius: 10px; 
-            font-size: 15px; font-weight: 800; cursor: pointer; animation: pulse 2s infinite; 
-            margin-top: 10px; box-shadow: 0 5px 15px rgba(221, 36, 118, 0.4); display: none;
-        }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
-        
-        .back-btn { background: #dfe6e9; color: #636e72; margin-top: 10px; box-shadow: none; }
-
-        /* --- BATCH LIST MODAL --- */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 3000; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
-        .modal-content { background: white; width: 90%; max-width: 350px; padding: 20px; border-radius: 15px; max-height: 70vh; overflow-y: auto; text-align: center; position: relative; animation: zoomUp 0.3s; }
-        .batch-grid-view { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
-        .batch-folder { background: #fff; border: 1px solid #eee; padding: 10px; border-radius: 10px; cursor: pointer; transition: 0.3s; }
-        .batch-folder:hover { background: #f0faff; border-color: #4facfe; }
-        .batch-folder i { font-size: 25px; color: #fbc531; margin-bottom: 5px; }
-        .batch-folder h4 { margin: 0; color: #2f3542; font-weight: 700; font-size: 14px; }
-        .batch-folder span { font-size: 11px; color: #a4b0be; font-weight: 600; }
-        .close-modal-btn { position: absolute; top: 10px; right: 15px; font-size: 24px; cursor: pointer; color: #ff7675; }
-
-        /* --- CARD FEE MODAL STYLES (NEW) --- */
-        #cardFeeModal .modal-content { border-top: 5px solid #e2136e; }
-        .fee-notice { background: #fff3cd; color: #856404; padding: 10px; border-radius: 8px; font-size: 12px; margin-bottom: 15px; border: 1px solid #ffeeba; }
-        .fee-amount { font-size: 24px; font-weight: 800; color: #e2136e; margin: 10px 0; }
-        
-        .trx-input { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 10px; font-size: 14px; text-align: center; margin-bottom: 10px; }
-        .trx-input:focus { border-color: #e2136e; outline: none; }
-        
-        .or-divider { font-size: 12px; color: #999; margin: 5px 0 10px; font-weight: 600; display:block; }
-
-        /* --- 2. UPDATED UPLOAD BUTTON STYLE (MATCHING YOUR IMAGE) --- */
-        .upload-dashed-area {
-            background-color: #eff3ff; /* হালকা নীলচে ব্যাকগ্রাউন্ড */
-            border: 1.5px dashed #4e4eff; /* নীলচে/পার্পল ড্যাশড বর্ডার */
-            border-radius: 8px;
-            padding: 12px;
-            cursor: pointer;
-            transition: 0.3s;
-            color: #4e4eff;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            font-size: 14px;
-            font-weight: 600;
-        }
-        .upload-dashed-area:hover { 
-            background-color: #e0e7ff; 
+.save-img-btn:active {
+    background: white;
+    color: #333;
+    transform: scale(0.95);
+}
+        .profile-name { font-size: 22px; font-weight: 800; margin: 5px 0; }
+        .profile-batch { background: rgba(255,255,255,0.2); padding: 4px 15px; border-radius: 20px; font-size: 13px; font-weight: 600; }
+        .sl-badge { 
+            position: absolute; top: 20px; left: 20px; 
+            background: white; color: #333; padding: 5px 12px; 
+            border-radius: 15px; font-weight: 800; font-size: 12px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2); display: none; 
         }
         
-        .verify-btn { background: #e2136e; color: white; width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 14px; }
+        .profile-body { padding: 25px; overflow-y: auto; }
+        .info-line { 
+            display: flex; justify-content: space-between; margin-bottom: 15px; 
+            border-bottom: 1px dashed #eee; padding-bottom: 10px; font-size: 14px; 
+        }
+        .info-line span { color: #7f8c8d; font-weight: 600; }
+        .info-line strong { color: #2c3e50; font-weight: 700; text-align: right; }
+        
+        .guest-section { 
+            background: #f8f9fa; padding: 15px; border-radius: 12px; 
+            margin-top: 15px; display: none; border: 1px solid #e1e1e1; 
+        }
+        .guest-title { 
+            font-size: 11px; font-weight: 800; color: #95a5a6; 
+            margin-bottom: 10px; display: block; text-transform: uppercase; letter-spacing: 1px; 
+        }
+        
+        .action-buttons { display: flex; gap: 10px; margin-top: 25px; }
+        .btn-yes { 
+            flex: 1; padding: 12px; background: linear-gradient(to right, #11998e, #38ef7d); 
+            color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; 
+            box-shadow: 0 5px 15px rgba(56, 239, 125, 0.3);
+        }
+        .btn-no { 
+            flex: 1; padding: 12px; background: linear-gradient(to right, #cb2d3e, #ef473a); 
+            color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; 
+            box-shadow: 0 5px 15px rgba(239, 71, 58, 0.3);
+        }
+        
+        .sender-highlight {
+            font-size: 16px; color: #d35400; font-weight: 800; 
+            background: #fdebd0; padding: 3px 10px; border-radius: 6px; display: inline-block;
+        }
 
-        /* --- FOOTER MODEL 3 (MAGIC BORDER) --- */
-        .dev-footer {
-            text-align: center; margin-top: 50px; padding-bottom: 30px; color: rgba(255,255,255,0.9);
-        }
-        .dev-logo {
-            width: 100px; height: 100px; border-radius: 50%; 
-            border: 5px solid #fff; object-fit: cover; 
-            margin-bottom: 15px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            animation: magicFloat 3s ease-in-out infinite;
+        .pdf-btn {
+            background: #e74c3c; color: white; border: none; padding: 8px 15px; border-radius: 8px; 
+            cursor: pointer; font-weight: 700; font-size: 12px; display: flex; align-items: center; gap: 5px;
+            box-shadow: 0 3px 10px rgba(231, 76, 60, 0.3);
         }
 
-        @keyframes magicFloat {
-            0% { transform: translateY(0px); border-color: #FFD700; }
-            50% { transform: translateY(-10px); border-color: #00d2d3; }
-            100% { transform: translateY(0px); border-color: #FFD700; }
+        /* --- DEVELOPER FOOTER --- */
+        .dev-footer { text-align: center; margin-top: 40px; padding-bottom: 20px; color: rgba(255,255,255,0.8); }
+        .dev-logo { 
+            width: 80px; height: 80px; border-radius: 50%; border: 3px solid #fff; 
+            object-fit: cover; margin-bottom: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); 
+            animation: pulseLogo 2s infinite;
         }
-        .dev-name { font-size: 14px; font-weight: 800; margin-bottom: 10px; text-shadow: 0 2px 5px rgba(0,0,0,0.3); }
+        @keyframes pulseLogo { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); } 70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(255, 255, 255, 0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); } }
+        
+        .dev-name { font-size: 14px; font-weight: 700; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
         .social-icons { display: flex; justify-content: center; gap: 15px; }
-        .social-btn { width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-size: 18px; text-decoration: none; background: rgba(255,255,255,0.1); backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
-
-        /* Custom SweetAlert Style */
-        .swal2-popup {
-            font-family: 'Poppins', sans-serif !important;
-            border-radius: 20px !important;
+        .social-btn { 
+            width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; 
+            color: white; font-size: 20px; text-decoration: none; transition: 0.3s; 
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
         }
-        .swal2-title {
-            color: #2d3436 !important;
-            font-size: 20px !important;
-        }
-        .swal2-confirm {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-            box-shadow: 0 5px 15px rgba(118, 75, 162, 0.4) !important;
-        }
-
-        /* ----- HIDDEN CARD STYLES (EXACTLY FROM TEST.HTML) ----- */
-        #final-card {
-            position: relative;
-            /* ক্যানভা ডিজাইনের অনুপাত অনুযায়ী ফিক্সড সাইজ */
-            width: 400px; 
-            height: 566px; 
-            flex-shrink: 0;
-            background-color: white;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
-
-        /* ব্যাকগ্রাউন্ড ইমেজ */
-        #bg-layer {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            top: 0; left: 0;
-            z-index: 1;
-        }
-
-        /* ১. ইউজার ফটো (UPDATED: Added Black Border) */
-        #user-pic {
-            position: absolute;
-            width: 170px;  /* ছবির সাইজ */
-            height: 170px;
-            border-radius: 50%;
-            object-fit: cover;
-            
-            /* টপ-লেফট অ্যাডজাস্টমেন্ট */
-            top: 235px;   /* উপর থেকে নিচে নামানো */
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 2;   /* ব্যাকগ্রাউন্ডের উপরে */
-            
-            /* NEW: BLACK CIRCLE BORDER */
-            border: 4px solid #000000;
-            box-sizing: border-box;
-        }
-
-        /* ২. নাম (সবুজ বক্সের জায়গায়) */
-        .name-badge {
-            position: absolute;
-            top: 435px;   /* ছবির নিচে, রিবনের নিচে */
-            left: 50%;
-            transform: translateX(-50%);
-            
-            background-color: #00a651; /* হুবহু ডিজাইনের সবুজ কালার */
-            color: white;
-            padding: 5px 30px;
-            border-radius: 50px;
-            font-size: 20px;
-            font-weight: bold;
-            text-transform: capitalize;
-            white-space: nowrap;
-            z-index: 3;
-        }
-
-        /* ৩. ব্যাচ এবং SL (নিচে) */
-        .info-text {
-            position: absolute;
-            top: 480px; /* নামের নিচে */
-            width: 100%;
-            text-align: center;
-            z-index: 3;
-            line-height: 1.4;
-        }
-
-        .batch-style {
-            color: #00aeef; /* আকাশী নীল */
-            font-size: 18px;
-            font-weight: 900;
-            text-transform: uppercase;
-        }
-        
-        .sl-style {
-            color: black;
-            font-size: 15px;
-            font-weight: bold;
-        }
-
-        /* ৪. তারিখ (একদম নিচে) */
-        .date-style {
-            position: absolute;
-            bottom: 15px; /* একদম নিচে */
-            width: 100%;
-            text-align: center;
-            font-size: 13px;
-            font-weight: bold;
-            color: black;
-            z-index: 3;
-        }
+        .social-btn:hover { background: white; color: #333; transform: translateY(-3px); }
     </style>
 </head>
 <body>
 
-    <!-- NEW FULL SCREEN BLACK LOADING OVERLAY -->
-    <div id="black-loading-screen">
-        <div class="loading-text-style">
-            Loading<span class="dots"></span> <span id="ocr-percentage">0%</span>
+    <!-- LOGIN SECTION -->
+    <div id="loginSection">
+        <div class="login-card">
+            <h2>Admin Login</h2>
+            <input type="email" id="adminEmail" placeholder="Admin Email">
+            <input type="password" id="adminPass" placeholder="Password">
+            <button class="login-btn" onclick="adminLogin()">Login</button>
+            <p id="loginError" class="login-error">Invalid Email or Password</p>
         </div>
     </div>
 
-    <!-- School Title Animation -->
-    <div class="school-title">
-        বিশ্বহরিগাছা বহালগাছা উচ্চ বিদ্যালয় <br> পুনর্মিলনী ২০২৬
-    </div>
-
-    <!-- FACEBOOK POPUP -->
-    <div id="fbPopup" class="popup-overlay">
-        <div class="popup-box">
-            <!-- School Logo -->
-            <img src="https://i.ibb.co.com/PzVtgrv3/FB-IMG-1768154944781.jpg" class="popup-logo" alt="School Logo">
-            <h3>আমাদের পেজ ফলো করুন!</h3>
-            <p>বিশ্বহরিগাছা বহালগাছা উচ্চ বিদ্যালয়</p>
-            <a href="https://www.facebook.com/share/1C57oEp3Xf/" target="_blank" class="popup-btn popup-btn-primary"><i class="fab fa-facebook-f"></i> Follow Page</a>
-            <button class="popup-btn close-popup" onclick="closePopup()">Close</button>
+    <!-- MAIN ADMIN CONTENT -->
+    <div id="adminPanelContent">
+        <div class="top-header">
+            <h3>Admin Panel</h3>
+            <button class="logout-btn" onclick="adminLogout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
         </div>
-    </div>
 
-    <!-- Approved Batches Button -->
-    <button class="approved-batch-btn" onclick="showApprovedBatches()">
-        <i class="fas fa-folder-open"></i> <span data-key="btnApproved">All Registered Participants</span>
-    </button>
+        <!-- 1. DASHBOARD (PENDING) -->
+        <div id="dashboard" class="section active">
+            <div class="search-box">
+                <i class="fas fa-search" style="color: #999; margin-left: 10px;"></i>
+                <input type="text" id="searchAll" placeholder="Search by Name, Batch or Phone..." onkeyup="renderDashboard()">
+            </div>
 
-    <!-- BATCH LIST MODAL -->
-    <div id="batchModal" class="modal-overlay">
-        <div class="modal-content">
-            <span class="close-modal-btn" onclick="document.getElementById('batchModal').style.display='none'">&times;</span>
-            <h3 style="color:#6c5ce7; font-weight:800; margin-bottom:10px;">Approved Batches</h3>
-            <div id="batchListContainer" class="batch-grid-view">
-                <!-- Batches will load here -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3 id="dTotal">0</h3>
+                    <p>Registered</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="dPaidCount">0</h3>
+                    <p>Paid Users</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="dGuestCount">0</h3>
+                    <p>Total Guest</p>
+                </div>
+            </div>
+
+            <div class="stats-full">
+                <div class="stat-card highlight-card" style="box-shadow: 0 10px 30px rgba(17, 153, 142, 0.4);">
+                    <h3 id="dAmount">0 ৳</h3>
+                    <p>Collected Amount</p>
+                </div>
+            </div>
+
+            <div class="table-wrapper">
+                <div class="table-header-text"><i class="fas fa-clock"></i> Pending Requests (New)</div>
+                <table id="pendingTable"></table>
             </div>
         </div>
-    </div>
-
-    <!-- NEW: CARD FEE VERIFICATION MODAL (UPDATED LAYOUT) -->
-    <div id="cardFeeModal" class="modal-overlay">
-        <div class="modal-content">
-            <span class="close-modal-btn" onclick="closeCardFeeModal()">&times;</span>
-            
-            <!-- FIXED ICON HERE -->
-            <div style="margin-bottom: 10px;">
-                 <i class="fas fa-download" style="font-size: 30px; color: #444;"></i>
-                 <i class="fas fa-arrow-right" style="margin: 0 10px; color: #999;"></i>
-                 <i class="fas fa-id-card" style="font-size: 30px; color: #e2136e;"></i>
+        
+        <!-- 4. REVIEW (INTERMEDIATE STEP) -->
+        <div id="reviewSection" class="section">
+             <div class="table-wrapper" style="margin-top:0;">
+                <div class="table-header-text" style="background:#fff3e0; color:#d35400;">
+                    <i class="fas fa-clipboard-check"></i> Final Review List
+                </div>
+                <table id="reviewTable"></table>
             </div>
-
-            <h3 style="color:#e2136e; font-weight:800; margin-bottom:5px;">কার্ড ডাউনলোড ফি</h3>
-            
-            <div id="adminNoticeText" class="fee-notice">
-                <!-- Admin notice will load here -->
-            </div>
-
-            <div class="fee-amount"><span id="adminFeeAmount">5</span> ৳</div>
-            
-            <p style="font-size:12px; color:#555; margin-bottom:15px;">
-                বিকাশ "Send Money" করুন এই নম্বরে:<br>
-                <!-- Number with COPY BUTTON -->
-                <strong style="font-size:18px; color:#2d3436; background:#f1f2f6; padding:5px 15px; border-radius:50px; display:inline-flex; align-items:center; margin-top:5px; border:1px dashed #e2136e;" id="adminBkashNumber">
-                    Loading...
-                </strong>
-                <i class="fas fa-copy copy-btn" onclick="copyToClipboard('adminBkashNumber')" style="font-size:18px; margin-left:8px;"></i>
-            </p>
-
-            <!-- INPUT AT TOP -->
-            <input type="text" id="cardTrxInput" class="trx-input" placeholder="TrxID (Type or Paste SMS)" style="text-transform: uppercase;">
-            
-            <!-- SEPARATOR -->
-            <span class="or-divider">অথবা</span>
-
-            <!-- UPDATED UPLOAD BUTTON (Like Red Circled Area) -->
-            <div class="upload-dashed-area" onclick="triggerCamera()">
-                <i class="fas fa-image" style="font-size: 18px;"></i>
-                <span>স্ক্রিনশট আপলোড করুন</span>
-            </div>
-            <input type="file" id="scanInput" accept="image/*" style="display:none;" onchange="handleScreenshot(this)">
-            
-            <button class="verify-btn" id="verifyCardBtn" onclick="verifyCardPayment()">Verify & Download</button>
-            <p id="cardVerifyMsg" style="font-size:11px; margin-top:8px; font-weight:bold;"></p>
+            <p style="text-align:center; margin-top:15px; font-size:12px; color:#ddd;">Users here are verified but not yet final approved.</p>
         </div>
-    </div>
 
-    <div class="container">
-        <button class="lang-btn" id="langToggle" onclick="toggleLanguage()"><i class="fas fa-globe"></i> EN</button>
-
-        <!-- Login/Register -->
-        <div id="authContainer">
-            <h2 style="text-align: center; margin-bottom: 15px; color: #2d3436; font-weight:800; font-size: 20px;" data-key="welcome">স্বাগতম!</h2>
-            <div class="tabs">
-                <button class="tab-btn active" onclick="switchTab('login')" data-key="login">লগইন</button>
-                <button class="tab-btn" onclick="switchTab('register')" data-key="register">রেজিস্ট্রেশন</button>
+        <!-- NEW REGISTERED SECTION (ALL USERS) -->
+        <div id="registeredSection" class="section">
+            <div class="approved-header">
+                <h3>All Registered</h3>
+                <div style="display:flex; gap:10px;">
+                    <button onclick="downloadRegisteredExcel()" class="excel-btn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"><i class="fas fa-file-excel"></i> Excel</button>
+                    <input type="text" id="searchRegistered" class="search-approved" placeholder="Search Registered..." onkeyup="searchRegisteredUsers()">
+                </div>
             </div>
+            
+            <div id="regBatchGrid" class="batch-grid"></div>
 
-            <div id="loginSection" class="form-box active">
-                <form id="loginForm">
-                    <div class="form-group"><label data-key="mobile"><i class="fas fa-mobile-alt"></i> মোবাইল নম্বর</label><input type="tel" id="loginPhone" oninput="forceEnglish(this)" required></div>
-                    <div class="form-group"><label data-key="password"><i class="fas fa-lock"></i> পাসওয়ার্ড</label><input type="password" id="loginPass" required></div>
-                    <button type="submit" class="btn" id="loginBtn" data-key="loginBtn">লগইন করুন</button>
-                    <p id="msgLogin" style="color:#e74c3c; text-align:center; margin-top:10px; font-weight:600; font-size:12px;"></p>
-                </form>
+            <div id="regSearchContainer" style="display:none;">
+                <div class="table-wrapper">
+                    <div class="table-header-text">🔍 Search Results</div>
+                    <table id="regSearchTable"></table>
+                </div>
             </div>
-
-            <div id="registerSection" class="form-box">
-                <form id="regForm">
-                    <!-- ENFORCE ENGLISH INPUT HERE -->
-                    <div class="form-group"><label data-key="name"><i class="fas fa-user"></i> নাম (English Only)</label><input type="text" id="regName" oninput="forceEnglish(this)" required></div>
-                    <div class="form-group"><label data-key="batch"><i class="fas fa-graduation-cap"></i> ব্যাচ (SSC - Digits Only)</label><input type="tel" id="regBatch" oninput="forceEnglish(this)" required></div>
+            
+            <div id="regBatchDetailView" style="display:none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <button onclick="closeRegisteredView()" style="padding:8px 15px; border:none; background:#fff; border-radius:20px; cursor:pointer; font-weight:700; color:#555; box-shadow: 0 3px 10px rgba(0,0,0,0.1);">← Back</button>
+                    </div>
                     
-                    <div class="form-group"><label data-key="mobile"><i class="fas fa-phone-alt"></i> মোবাইল নম্বর</label><input type="tel" id="regPhone" oninput="forceEnglish(this)" required></div>
-                    
-                    <div class="form-group"><label data-key="altMobile"><i class="fas fa-phone"></i> বিকল্প মোবাইল নম্বর (ঐচ্ছিক)</label><input type="tel" id="regAltPhone" oninput="forceEnglish(this)" placeholder="Optional"></div>
-
-                    <div class="form-group"><label data-key="address"><i class="fas fa-map-marker-alt"></i> বর্তমান ঠিকানা (English)</label><input type="text" id="regAddress" oninput="forceEnglish(this)" required></div>
-                    <div class="form-group"><label data-key="password"><i class="fas fa-key"></i> পাসওয়ার্ড</label><input type="password" id="regPass" minlength="6" required></div>
-                    <div class="form-group"><label data-key="photo"><i class="fas fa-camera"></i> ছবি</label><input type="file" id="regPhoto" accept="image/*" required></div>
-                    <button type="submit" class="btn" id="regBtn" data-key="regBtn">রেজিস্ট্রেশন করুন</button>
-                    <p id="msgRegister" style="color:#e74c3c; text-align:center; margin-top:10px; font-weight:600; font-size:12px;"></p>
-                </form>
+                    <button onclick="downloadRegisteredBatchPDF()" class="pdf-btn"><i class="fas fa-file-pdf"></i> PDF</button>
+                </div>
+                <div class="table-wrapper">
+                    <div class="table-header-text">👥 Registered List (<span id="regBatchTitleName"></span>)</div>
+                    <table id="regBatchTable"></table>
+                </div>
             </div>
         </div>
 
-        <!-- Profile View -->
-        <div id="profileView">
-            <div class="id-card" id="mainIdCard">
-                
-                <div class="cover-bg">
-                    <div class="stats-box" id="statRegistered">
-                        <span class="stats-count" id="valRegistered">0</span>
-                        <span class="stats-label" data-key="statReg">Registered</span>
-                    </div>
-                    <div class="stats-box" id="statPaid">
-                        <span class="stats-count" id="valPaid">0</span>
-                        <span class="stats-label" data-key="statPaid">Paid Users</span>
-                    </div>
-                    <div class="stats-box" id="statCollected">
-                        <span class="stats-count" id="valCollected">0</span>
-                        <span class="stats-label" data-key="statCollect">Collected</span>
-                    </div>
-                    <div class="stats-box" id="statGuest">
-                        <span class="stats-count" id="valGuest">0</span>
-                        <span class="stats-label" data-key="statGuest">Guests</span>
-                    </div>
-                </div>
-
-                <div class="profile-img-container"><img id="viewPhoto" src="" alt="Profile"></div>
-                <h3 class="user-name" id="viewName">Name</h3>
-                <span class="user-batch"><span data-key="batch_label">SSC Batch:</span> <span id="viewBatch">--</span></span>
-                <div id="slNumberDisplay" class="sl-number" style="display:none;"></div>
-                
-                <!-- Status & Download Button Wrapper -->
-                <div style="margin-bottom: 15px;">
-                    <div id="statusContainer" class="status-badge status-pending">Pending</div>
-                    
-                    <button id="downloadCardBtn" class="download-btn" onclick="generateAndDownloadCard()">
-                        <i class="fas fa-download"></i> Card
-                    </button>
-                    
-                    <!-- NEW: CARD SYSTEM CLOSED MSG -->
-                    <p id="cardSystemClosedMsg" style="display:none; color:#c0392b; font-weight:700; margin-top:10px; background: #fab1a0; padding:10px; border-radius:8px; font-size: 13px;">
-                        <i class="fas fa-exclamation-circle"></i> কার্ড ডাউনলোড অপশন এখনো চালু হয়নি।
-                    </p>
-                </div>
-
-                <div class="full-details" style="display:block;">
-                    <!-- User Phone with COPY BUTTON -->
-                    <div class="detail-row">
-                        <span data-key="mobile"><i class="fas fa-phone-alt"></i> মোবাইল নম্বর:</span> 
-                        <span style="display:flex; align-items:center;">
-                            <strong id="viewPhone">--</strong>
-                            <i class="fas fa-copy copy-btn" onclick="copyToClipboard('viewPhone')"></i>
-                        </span>
-                    </div>
-                    
-                    <div class="detail-row" id="rowAltPhone" style="display:none;"><span data-key="altMobile"><i class="fas fa-phone"></i> বিকল্প মোবাইল:</span> <strong id="viewAltPhone">--</strong></div>
-                    <div class="detail-row"><span data-key="address"><i class="fas fa-map-marker-alt"></i> ঠিকানা:</span> <strong id="viewAddress">--</strong></div>
-                </div>
-
-                <div id="approvedDetails" class="full-details">
-                    <div class="detail-title" data-key="payInfo">পেমেন্ট তথ্য</div>
-                    
-                    <div class="detail-row"><span data-key="methodLabel"><i class="fas fa-wallet"></i> মেথড:</span> <strong id="vMethod">--</strong></div>
-                    <div class="detail-row"><span data-key="senderLabel"><i class="fas fa-paper-plane"></i> সেন্ডার নম্বর:</span> <strong id="vSender">--</strong></div>
-                    <div class="detail-row"><span data-key="amountLabel"><i class="fas fa-money-bill-wave"></i> টাকার পরিমাণ:</span> <strong id="vAmount" style="color:#27ae60">--</strong></div>
-                    
-                    <div id="vGuestBox">
-                        <div class="detail-title" data-key="guestInfo">অতিথি তথ্য</div>
-                        <div class="detail-row" id="rowSpouse"><span data-key="spouseLabel"><i class="fas fa-user-friends"></i> স্বামী/স্ত্রী:</span> <strong id="vSpouse"></strong></div>
-                        <div class="detail-row" id="rowKidA"><span data-key="kidALabel"><i class="fas fa-child"></i> Above 5 Years:</span> <strong id="vKidA"></strong></div>
-                        <div class="detail-row" id="rowKidB"><span data-key="kidBLabel"><i class="fas fa-baby"></i> Below 5 Years:</span> <strong id="vKidB"></strong></div>
-                    </div>
-                    
-                    <div class="detail-row" style="margin-top:15px; border-bottom: none;"><span data-key="tshirtLabel"><i class="fas fa-tshirt"></i> T-Shirt Size:</span> <strong id="vTshirt" style="color:#6c5ce7; font-size: 18px;">--</strong></div>
-                </div>
-
-                <div style="padding: 0 20px 20px;">
-                    <button id="showPayFormBtn" class="pay-now-btn" data-key="payBtn"><i class="fas fa-credit-card"></i> পেমেন্ট করুন</button>
-                    <p id="paymentClosedMsg" style="color:#c0392b; font-weight:700; display:none; margin-top:15px; background: #fab1a0; padding:10px; border-radius:8px;"><i class="fas fa-exclamation-triangle"></i> পেমেন্ট সাময়িকভাবে বন্ধ আছে।</p>
+        <!-- 2. BATCHES (APPROVED) -->
+        <div id="batches" class="section">
+            <div class="approved-header">
+                <h3>Approved Batches</h3>
+                <div style="display:flex; gap:10px;">
+                    <!-- GLOBAL EXCEL BUTTON ADDED HERE -->
+                    <button onclick="downloadGlobalExcel()" class="excel-btn"><i class="fas fa-file-excel"></i> Excel</button>
+                    <input type="text" id="searchApproved" class="search-approved" placeholder="Search Global..." onkeyup="searchApprovedUsers()">
                 </div>
             </div>
+            
+            <div id="batchGrid" class="batch-grid"></div>
 
-            <!-- Payment Form -->
-            <div id="paymentFormSection">
-                <h3 style="color: #6c5ce7; margin-bottom: 20px; font-weight:800; text-align:center;" data-key="payDetails">পেমেন্ট বিবরণ</h3>
-                
-                <div class="guest-option">
-                    <div class="guest-header">
-                        <input type="checkbox" id="checkSpouse" onchange="calculateTotal()">
-                        <label for="checkSpouse"><span data-key="spouseLabel">Spouse</span> - <span id="dispSpouseFee">500</span>৳</label>
-                    </div>
-                    <!-- ENFORCE ENGLISH -->
-                    <input type="text" id="spouseName" oninput="forceEnglish(this)" data-key-ph="ph_name" placeholder="Name" style="width:100%; padding:10px; display:none; margin-top:8px; border:1px solid #ddd; border-radius:8px;">
+            <div id="approvedSearchContainer" style="display:none;">
+                <div class="table-wrapper">
+                    <div class="table-header-text">🔍 Search Results</div>
+                    <table id="approvedSearchTable"></table>
                 </div>
-
-                <div class="guest-option">
-                    <div class="guest-header">
-                        <input type="checkbox" id="checkKidsBelow" onchange="calculateTotal()">
-                        <label for="checkKidsBelow"><span data-key="kidBLabel">Below 5 Years Kids Name</span> - Free</label>
-                    </div>
-                    <!-- ENFORCE ENGLISH -->
-                    <input type="text" id="kidsBelowName" oninput="forceEnglish(this)" data-key-ph="ph_names" placeholder="Names" style="width:100%; padding:10px; display:none; margin-top:8px; border:1px solid #ddd; border-radius:8px;">
-                </div>
-
-                <div class="guest-option">
-                    <div class="guest-header">
-                        <input type="checkbox" id="checkKidsAbove" onchange="calculateTotal()">
-                        <label for="checkKidsAbove"><span data-key="kidALabel">Above 5 Years Kids Name</span> - <span id="dispKidFee">300</span>৳</label>
-                    </div>
-                    <div id="kidsAboveBox" style="display:none; margin-top:8px;">
-                        <!-- ENFORCE ENGLISH -->
-                        <input type="text" id="kidsAboveName" oninput="forceEnglish(this)" data-key-ph="ph_names" placeholder="Names" style="width:100%; padding:10px; margin-bottom:5px; border:1px solid #ddd; border-radius:8px;">
-                        <select id="kidsAboveQty" onchange="calculateTotal()" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;">
-                            <option value="1">1</option><option value="2">2</option><option value="3">3</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="guest-option" style="border: 2px solid #a29bfe;">
-                    <div class="guest-header" style="justify-content: space-between;">
-                        <label style="font-weight:700; color:#2d3436;" data-key="tshirtLabel"><i class="fas fa-tshirt"></i> T-Shirt Size</label>
-                        <select id="payTshirt" style="padding: 5px 15px; border-radius: 5px; border: 1px solid #ccc; outline:none; font-weight:bold; background:#f1f2f6;">
-                            <option value="" data-key="select">Select</option>
-                            <option value="M">M</option>
-                            <option value="L">L</option>
-                            <option value="XL">XL</option>
-                            <option value="XXL">XXL</option>
-                            <option value="XXXL">XXXL</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="total-box">
-                    <small data-key="totalFee">মোট ফি</small>
-                    <h2>Total: <span id="displayTotal">0</span> ৳</h2>
-                </div>
-
-                <div class="form-group" style="margin-top:15px;">
-                    <label data-key="payMethod"><i class="fas fa-wallet"></i> পেমেন্ট মেথড <span style="color:red">*</span></label>
-                    <select id="payMethod">
-                        <option value="" data-key="select">Select</option>
-                        <!-- Options generated by JS -->
-                    </select>
-                </div>
-                
-                <div id="senderInputs" style="display:block;">
-                    <!-- ENFORCE ENGLISH -->
-                    <div class="form-group"><label data-key="senderNo"><i class="fas fa-paper-plane"></i> সেন্ডার নম্বর <span style="color:red">*</span></label><input type="tel" id="senderPhone" oninput="forceEnglish(this)" placeholder="যে নম্বর থেকে টাকা পাঠিয়েছেন"></div>
-                    <button id="confirmPayBtn" class="btn" data-key="confirmBtn">নিশ্চিত করুন</button>
-                </div>
-
-                <button onclick="hidePaymentForm()" class="btn back-btn" data-key="backBtn"><i class="fas fa-arrow-left"></i> ফিরে যান</button>
             </div>
-
-            <!-- LOGOUT BUTTON (UPDATED) -->
-            <button onclick="logoutUser()" class="logout-btn" id="logoutBtn" style="background:linear-gradient(to right, #ff416c, #ff4b2b); color:white; width:100%; padding:12px; border:none; border-radius:12px; display:none; margin-top:20px; font-weight:700; box-shadow: 0 5px 15px rgba(255, 65, 108, 0.4); cursor:pointer;" data-key="logout"><i class="fas fa-sign-out-alt"></i> লগআউট</button>
+            
+            <div id="batchDetailView" style="display:none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <button onclick="closeBatchView()" style="padding:8px 15px; border:none; background:#fff; border-radius:20px; cursor:pointer; font-weight:700; color:#555; box-shadow: 0 3px 10px rgba(0,0,0,0.1);">← Back</button>
+                        
+                        <div class="batch-stats-box">
+                            <span class="stat-item-member">User: <span id="bTotalMember">0</span></span>
+                            <span class="stat-item-guest">Guest: <span id="bTotalGuest">0</span></span>
+                        </div>
+                    </div>
+                    
+                    <button onclick="downloadBatchPDF()" class="pdf-btn"><i class="fas fa-file-pdf"></i> PDF</button>
+                </div>
+                <div class="table-wrapper">
+                    <div class="table-header-text">✅ Student List (<span id="batchTitleName"></span>)</div>
+                    <table id="batchTable"></table>
+                </div>
+            </div>
         </div>
+
+        <!-- 3. SETTINGS -->
+        <div id="settings" class="section">
+            
+            <div class="settings-box">
+                <h4 style="color:#e74c3c;">System Control</h4>
+                <div class="control-item">
+                    <span style="font-weight:700; color:#444;">Receive Payment</span>
+                    <label class="switch">
+                        <input type="checkbox" id="paymentToggle" onchange="togglePaymentSystem()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="settings-box">
+                <h4 style="color:#3498db;">Payment Methods</h4>
+                <div class="add-method-group">
+                    <input type="text" id="newMethodName" placeholder="Method Name (e.g. Bkash Personal)">
+                    <button class="add-btn" onclick="addNewMethod()"><i class="fas fa-plus"></i> Add</button>
+                </div>
+                <div id="methodsListContainer"></div>
+            </div>
+
+            <div class="settings-box">
+                <h4 style="color:#2c3e50;">Fee Structure</h4>
+                <div class="form-group"><label>Registration Fee</label>
+                    <div class="input-group"><input type="number" id="setSelfFee"><button class="mini-save-btn" onclick="saveIndividual('self_fee', 'setSelfFee')">Save</button></div>
+                </div>
+                <div class="form-group"><label>Spouse Fee</label>
+                    <div class="input-group"><input type="number" id="setSpouseFee"><button class="mini-save-btn" onclick="saveIndividual('spouse_fee', 'setSpouseFee')">Save</button></div>
+                </div>
+                <div class="form-group"><label>Above 5 Years Kids Name Fee</label>
+                    <div class="input-group"><input type="number" id="setKidFee"><button class="mini-save-btn" onclick="saveIndividual('kid_fee', 'setKidFee')">Save</button></div>
+                </div>
+            </div>
+
+            <!-- DEVELOPER FOOTER -->
+            <div class="dev-footer">
+                <img src="https://i.ibb.co.com/0y9W4G0B/IMG-20260112-194542.jpg" class="dev-logo">
+                <div class="dev-name">Developed by 🌟 PIYASH 🌟</div>
+                <div class="dev-batch" style="font-size:12px; margin-bottom:5px;">Batch: 2018</div>
+                <div class="social-icons">
+                    <a href="https://www.facebook.com/piyashhasan.ph" class="social-btn fb-bg"><i class="fab fa-facebook-f"></i></a>
+                    <a href="https://wa.me/+8801325428923" class="social-btn wa-bg"><i class="fab fa-whatsapp"></i></a>
+                    <a href="https://t.me/piyashhasan_ph564" class="social-btn tg-bg"><i class="fab fa-telegram-plane"></i></a>
+                </div>
+            </div>
+        </div>
+
+        <div class="bottom-nav">
+            <div class="nav-item active" onclick="switchTab('dashboard', this)"><i class="fas fa-home"></i><span>Pending</span></div>
+            <div class="nav-item" onclick="switchTab('reviewSection', this)"><i class="fas fa-clipboard-check"></i><span>Review</span></div>
+            <!-- NEW REGISTERED TAB -->
+            <div class="nav-item" onclick="switchTab('registeredSection', this)"><i class="fas fa-users"></i><span>Registered</span></div>
+            <div class="nav-item" onclick="switchTab('batches', this)"><i class="fas fa-check-circle"></i><span>Approved</span></div>
+            <div class="nav-item" onclick="switchTab('settings', this)"><i class="fas fa-cog"></i><span>Setting</span></div>
+        </div>
+
+        <!-- PROFILE MODAL -->
+        <div class="modal" id="profileModal">
+            <div class="modal-content">
+                <span class="close-modal" onclick="closeModal()">&times;</span>
+                <div class="profile-header">
+    <div class="sl-badge" id="mSlNo">SL: #001</div>
+    
+    <!-- ইমেজ এবং বাটন কন্টেইনার -->
+    <div class="profile-img-container">
+        <img id="mPhoto" class="profile-pic" src="" alt="User Photo">
+        
+        <!-- আইডি "btnSaveImg" এবং স্টাইল "display:none" দিয়ে রাখা হলো -->
+        <button id="btnSaveImg" class="save-img-btn" onclick="downloadProfileImage()" style="display:none;">
+            <i class="fas fa-download"></i> Save Image
+        </button>
     </div>
 
-    <!-- DEVELOPER SECTION -->
-    <div class="dev-footer">
-        <img src="https://i.ibb.co.com/0y9W4G0B/IMG-20260112-194542.jpg" class="dev-logo">
-        <div class="dev-name">Developed by 🌟 PIYASH 🌟</div>
-       <div class="dev-batch">Batch: 2018</div>
-    <div class="contact-label" style="font-size:12px; margin-bottom:10px; opacity:0.8;">Contact Us</div>
-        <div class="social-icons">
-            <a href="https://www.facebook.com/piyashhasan.ph" class="social-btn fb-bg"><i class="fab fa-facebook-f"></i></a>
-            <a href="https://wa.me/+8801325428923" class="social-btn wa-bg"><i class="fab fa-whatsapp"></i></a>
-            <a href="https://t.me/piyashhasan_ph564" class="social-btn tg-bg"><i class="fab fa-telegram-plane"></i></a>
-        </div>
-    </div>
+    <h2 class="profile-name" id="mName">User Name</h2>
+    <span class="profile-batch" id="mBatch">Batch: 2000</span>
+</div>
+                <div class="profile-body">
+                    <div class="info-line"><span><i class="fas fa-phone"></i> Phone:</span> <strong id="mPhone">--</strong></div>
+                    <div class="info-line" id="rowAltPhone" style="display:none;"><span><i class="fas fa-phone-alt"></i> Alt Phone:</span> <strong id="mAltPhone">--</strong></div>
+                    <div class="info-line"><span><i class="fas fa-map-marker-alt"></i> Address:</span> <strong id="mAddress">--</strong></div>
+                    <div class="info-line"><span><i class="fas fa-tshirt"></i> T-Shirt:</span> <strong id="mTshirt" style="color:#667eea; font-size:15px;">--</strong></div>
+                    <div class="info-line"><span><i class="fas fa-wallet"></i> Method:</span> <strong id="mMethod" style="color:#3498db;">--</strong></div>
+                    
+                    <div class="info-line" style="align-items:center;">
+                        <span><i class="fas fa-paper-plane"></i> Sender No:</span> 
+                        <strong id="mSender" class="sender-highlight">--</strong>
+                    </div>
 
-    <!-- HIDDEN CARD CONTAINER (OFF-SCREEN) -->
-    <div style="position: absolute; left: -9999px; top: 0; overflow: hidden;">
-        <div id="final-card">
-            <!-- Background Image -->
-            <img id="bg-layer" crossorigin="anonymous" src="https://i.ibb.co.com/cXY4Jkqf/Congratulation-20260115-131216-0000.png" alt="Background">
+                    <div class="info-line"><span><i class="fas fa-coins"></i> Total Amount:</span> <strong id="mAmount" style="color:#27ae60; font-size:16px;">--</strong></div>
+                    
+                    <div id="guestSection" class="guest-section">
+                        <span class="guest-title">Guest Details</span>
+                        <div class="info-line" id="rowSpouse" style="display:none;"><span>Spouse:</span> <strong id="mSpouse"></strong></div>
+                        <div class="info-line" id="rowKidAbove" style="display:none;"><span>Above 5 Years Kids Name:</span> <strong id="mKidAbove"></strong></div>
+                        <div class="info-line" id="rowKidBelow" style="display:none;"><span>Below 5 Years Kids Name:</span> <strong id="mKidBelow"></strong></div>
+                    </div>
 
-            <!-- Dynamic Content -->
-            <img id="user-pic" src="" crossorigin="anonymous">
-            
-            <div class="name-badge" id="outName">Name Here</div>
-            
-            <div class="info-text">
-                <div class="batch-style">BATCH : <span id="outBatch">2018</span></div>
-                <div class="sl-style">Registration SL : <span id="outSL">01</span></div>
+                    <div class="action-buttons" id="actionBtns">
+                        <button class="btn-yes" id="btnApproveText" onclick="processUser()">Verify <i class="fas fa-check"></i></button>
+                        <button class="btn-no" onclick="rejectUser()">Reject <i class="fas fa-times"></i></button>
+                    </div>
+                </div>
             </div>
-
-            <div class="date-style">Date: <span id="outDate"></span></div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, query, where, updateDoc, doc, serverTimestamp, getDoc, orderBy, limit, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, doc, setDoc, query, where, getCountFromServer, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
-  apiKey: "AIzaSyA3HzAAEF42fE_siFSVCHKmg2Ir0HfI66g",
-  authDomain: "p-chat-b6aae.firebaseapp.com",
-  projectId: "p-chat-b6aae",
-  storageBucket: "p-chat-b6aae.firebasestorage.app",
-  messagingSenderId: "23194469942",
-  appId: "1:23194469942:web:0f2f7774d6fbf4570bba97"
-};
+            apiKey: "AIzaSyB-n-SgnGwn1P9b-1Xkv3S5QM4U1zHa5nQ",
+            authDomain: "bb-high-school-reunion-2026.firebaseapp.com",
+            projectId: "bb-high-school-reunion-2026",
+            storageBucket: "bb-high-school-reunion-2026.firebasestorage.app",
+            messagingSenderId: "54413925090",
+            appId: "1:54413925090:web:b6ac44faf6313dc19b1cbb"
+        }; 
 
         const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
         const db = getFirestore(app);
-        const imgbbAPI = "d685822691566e39accb630d6ef7a6d9";
 
-        let currentUserDocId = null;
-        let currentConfig = { 
-            self_fee: 1000, spouse_fee: 500, kid_fee: 300, accounts: {}, payment_active: true,
-            card_download_fee: 5, card_notice_text: "Demo Notice: Pay 5 Tk to Download",
-            card_download_active: false // Added Card Toggle Default
-        }; 
-        let currentLang = 'bn';
-        let currentUserStatus = 'New';
-        let currentUserData = {}; // Store full user object
+        let allData = [];
+        let selectedUserId = null;
+        let selectedUserStatus = null; // Track status for modal logic
+        let paymentMethods = {};
+        let currentViewBatch = null;
+        let currentRegViewBatch = null;
+        let unsubscribeData = null; 
 
-    window.forceEnglish = function(element) {
-        const regex = /[^\x00-\x7F]/g; 
-        if(regex.test(element.value)) {
-            element.value = element.value.replace(regex, '');
-            Swal.fire({
-                toast: true,
-                icon: 'warning',
-                title: 'দুঃখিত! শুধুমাত্র ইংরেজি অক্ষর ব্যবহার করুন।',
-                position: 'top',
-                showConfirmButton: false,
-                timer: 2000,
-                timerProgressBar: true,
-                background: '#fff3cd',
-                color: '#856404'
-            });
-        }
-    }
+        // --- AUTHENTICATION ---
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('adminPanelContent').style.display = 'block';
+                startDataListener(); 
+                loadAdminSettings();
+            } else {
+                document.getElementById('loginSection').style.display = 'flex';
+                document.getElementById('adminPanelContent').style.display = 'none';
+                if(unsubscribeData) unsubscribeData();
+            }
+        });
 
-        window.showAlert = function(title, text, icon) {
-            Swal.fire({
-                title: title,
-                text: text,
-                icon: icon,
-                confirmButtonText: 'OK',
-                background: '#fff',
-                confirmButtonColor: '#764ba2',
-                backdrop: `rgba(0,0,0,0.4)`
-            });
+        window.adminLogin = function() {
+            const email = document.getElementById('adminEmail').value;
+            const pass = document.getElementById('adminPass').value;
+            const err = document.getElementById('loginError');
+            
+            signInWithEmailAndPassword(auth, email, pass)
+                .then(() => { err.style.display = 'none'; })
+                .catch((error) => { err.style.display = 'block'; err.innerText = "Error: " + error.message; });
         }
 
-        // --- GLOBAL COPY FUNCTION ---
-        window.copyToClipboard = function(elementId) {
-            const textToCopy = document.getElementById(elementId).innerText.trim();
-            navigator.clipboard.writeText(textToCopy).then(() => {
-                const Toast = Swal.mixin({
-                    toast: true, position: 'top', showConfirmButton: false, timer: 1500,
-                    background: '#2ecc71', color: '#fff'
-                });
-                Toast.fire({ icon: 'success', title: 'Copied!' });
-            });
+        window.adminLogout = function() {
+            signOut(auth).then(() => { location.reload(); }).catch((error) => { console.error('Sign Out Error', error); });
         }
 
-        // --- AUTO LOGIN CHECK ON LOAD ---
-        window.onload = async function() {
-            setTimeout(() => {
-                document.getElementById('fbPopup').style.display = 'flex';
-            }, 1000);
-
-            // CHECK LOCAL STORAGE
-            const savedUserId = localStorage.getItem("reunion_user_id");
-            if(savedUserId) {
-                // Show loading state if needed, or just fetch
-                try {
-                    const docRef = doc(db, "students", savedUserId);
-                    const docSnap = await getDoc(docRef);
+        // --- LOAD SETTINGS ---
+        async function loadAdminSettings() {
+            try {
+                const docRef = doc(db, "config", "fees");
+                onSnapshot(docRef, (docSnap) => {
                     if (docSnap.exists()) {
-                        currentUserDocId = savedUserId;
-                        showProfile(docSnap.data());
-                    } else {
-                        localStorage.removeItem("reunion_user_id"); // Invalid ID
-                    }
-                } catch(e) {
-                    console.log("Auto login error:", e);
-                }
-            }
-        }
-
-        window.closePopup = function() {
-            document.getElementById('fbPopup').style.display = 'none';
-        }
-
-        window.logoutUser = function() {
-            localStorage.removeItem("reunion_user_id");
-            location.reload();
-        }
-
-        const langData = {
-            bn: {
-                welcome: "স্বাগতম!", login: "লগইন", register: "রেজিস্ট্রেশন",
-                mobile: "মোবাইল নম্বর", password: "পাসওয়ার্ড", loginBtn: "লগইন করুন",
-                name: "নাম (English)", batch: "ব্যাচ (SSC - English)", address: "বর্তমান ঠিকানা (English)", photo: "ছবি", regBtn: "রেজিস্ট্রেশন করুন",
-                batch_label: "SSC ব্যাচ:",
-                payBtn: "পেমেন্ট করুন", payDetails: "পেমেন্ট বিবরণ", totalFee: "মোট ফি",
-                payMethod: "পেমেন্ট মেথড", senderNo: "সেন্ডার নম্বর",
-                confirmBtn: "নিশ্চিত করুন", backBtn: "ফিরে যান", logout: "লগআউট", select: "সিলেক্ট করুন",
-                altMobile: "বিকল্প মোবাইল নম্বর (ঐচ্ছিক)", tshirtLabel: "টি-শার্ট সাইজ",
-                statReg: "নিবন্ধিত", statPaid: "পেমেন্ট করেছে", statCollect: "জমা হয়েছে", statGuest: "মোট অতিথি",
-                payInfo: "পেমেন্ট তথ্য", methodLabel: "মেথড:", senderLabel: "সেন্ডার নম্বর:", amountLabel: "টাকার পরিমাণ:",
-                guestInfo: "অতিথি তথ্য", spouseLabel: "স্বামী/স্ত্রী", 
-                kidALabel: "৫ বছরের বড় বাচ্চার নাম", kidBLabel: "৫ বছরের ছোট বাচ্চার নাম",
-                st_pending: "অপেক্ষা করুন", st_rejected: "বাতিল হয়েছে", st_approved: "অনুমোদিত", st_new: "পেমেন্ট বাকি",
-                ph_name: "নাম লিখুন (English)", ph_names: "নামগুলো লিখুন (English)",
-                alert_reg_ok: "রেজিস্ট্রেশন সফল!", alert_wait: "অপেক্ষা করুন...", alert_exists: "এই নম্বরে একাউন্ট আছে!",
-                alert_login_fail: "ভুল তথ্য!", alert_pay_ok: "পেমেন্ট সফলভাবে জমা হয়েছে!", alert_fill_all: "সব তথ্য দিন!",
-                alert_tshirt: "দয়া করে টি-শার্ট সাইজ সিলেক্ট করুন!",
-                alert_method_req: "দয়া করে পেমেন্ট মেথড সিলেক্ট করুন!",
-                alert_sender_req: "দয়া করে সেন্ডার নম্বর প্রদান করুন!",
-                btn_retry: "পুনরায় পেমেন্ট করুন", btnApproved: "সকল নিবন্ধিত অংশগ্রহণকারী"
-            },
-            en: {
-                welcome: "Welcome!", login: "Login", register: "Register",
-                mobile: "Mobile Number", password: "Password", loginBtn: "Login",
-                name: "Name (English)", batch: "Batch (SSC)", address: "Current Address (English)", photo: "Photo", regBtn: "Register",
-                batch_label: "SSC Batch:",
-                payBtn: "Payment Now", payDetails: "Payment Details", totalFee: "Total Fee",
-                payMethod: "Payment Method", senderNo: "Sender Number",
-                confirmBtn: "Confirm", backBtn: "Go Back", logout: "Logout", select: "Select",
-                altMobile: "Alternative Mobile Number (Optional)", tshirtLabel: "T-Shirt Size",
-                statReg: "Registered", statPaid: "Paid Users", statCollect: "Collected", statGuest: "Total Guests",
-                payInfo: "Payment Info", methodLabel: "Method:", senderLabel: "Sender No:", amountLabel: "Amount:",
-                guestInfo: "Guest Info", spouseLabel: "Spouse", 
-                kidALabel: "Above 5 Years Kids Name", kidBLabel: "Below 5 Years Kids Name",
-                st_pending: "Pending Approval", st_rejected: "Rejected", st_approved: "Approved", st_new: "Payment Due",
-                ph_name: "Enter Name (English)", ph_names: "Enter Names (English)",
-                alert_reg_ok: "Registration Successful!", alert_wait: "Please Wait...", alert_exists: "Number already exists!",
-                alert_login_fail: "Invalid Credentials!", alert_pay_ok: "Payment Submitted Successfully!", alert_fill_all: "Fill all details!",
-                alert_tshirt: "Please select T-Shirt Size!",
-                alert_method_req: "Please select a Payment Method!",
-                alert_sender_req: "Please enter Sender Number!",
-                btn_retry: "Retry Payment", btnApproved: "All Registered Participants"
-                
-          }
-        };
-
-        window.showApprovedBatches = async function() {
-            const modal = document.getElementById('batchModal');
-            const container = document.getElementById('batchListContainer');
-            modal.style.display = 'flex';
-            container.innerHTML = '<p style="grid-column:1/-1; color:#888;">Loading...</p>';
-
-            try {
-                const q = query(collection(db, "students"), where("payment_status", "==", "Approved"));
-                const snap = await getDocs(q);
-                const batchCounts = {};
-
-                snap.forEach(d => {
-                    const b = d.data().batch;
-                    batchCounts[b] = (batchCounts[b] || 0) + 1;
-                });
-
-                container.innerHTML = "";
-                const batches = Object.keys(batchCounts).sort();
-                
-                if(batches.length === 0) {
-                    container.innerHTML = '<p style="grid-column:1/-1; color:#666;">No approved batches yet.</p>';
-                    return;
-                }
-
-                batches.forEach(b => {
-                    container.innerHTML += `
-                        <div class="batch-folder">
-                            <i class="fas fa-folder"></i>
-                            <h4>Batch ${b}</h4>
-                            <span>${batchCounts[b]} Approved</span>
-                        </div>
-                    `;
-                });
-            } catch(e) {
-                console.error(e);
-                container.innerHTML = '<p style="grid-column:1/-1; color:red;">Error loading batches.</p>';
-            }
-        }
-
-        window.toggleLanguage = function() {
-            currentLang = currentLang === 'bn' ? 'en' : 'bn';
-            document.getElementById('langToggle').innerHTML = currentLang === 'bn' ? '<i class="fas fa-globe"></i> EN' : '<i class="fas fa-globe"></i> BN';
-            updateTexts();
-            updateStatusText();
-        }
-
-        function updateTexts() {
-            document.querySelectorAll('[data-key]').forEach(el => {
-                const key = el.getAttribute('data-key');
-                if(langData[currentLang][key]) {
-                    if(el.querySelector('i')) {
-                        const icon = el.querySelector('i').outerHTML;
-                        el.innerHTML = icon + " " + langData[currentLang][key];
-                    } else {
-                        el.innerText = langData[currentLang][key];
-                    }
-                }
-            });
-            document.querySelectorAll('[data-key-ph]').forEach(el => {
-                const key = el.getAttribute('data-key-ph');
-                if(langData[currentLang][key]) el.placeholder = langData[currentLang][key];
-            });
-        }
-
-        function updateStatusText() {
-            const statusBox = document.getElementById('statusContainer');
-            const payBtn = document.getElementById('showPayFormBtn');
-            const msgClosed = document.getElementById('paymentClosedMsg');
-            
-            // CARD BUTTON & MSG
-            const dlBtn = document.getElementById('downloadCardBtn');
-            const cardMsg = document.getElementById('cardSystemClosedMsg');
-            
-            if (currentUserStatus === 'Approved') statusBox.innerText = langData[currentLang].st_approved;
-            else if (currentUserStatus === 'Rejected') statusBox.innerText = langData[currentLang].st_rejected;
-            else if (currentUserStatus === 'Pending') statusBox.innerText = langData[currentLang].st_pending;
-            else statusBox.innerText = langData[currentLang].st_new;
-
-            // --- CHECK ADMIN SWITCH FOR CARD ---
-            if (currentUserStatus === 'Approved') {
-                if (currentConfig.card_download_active === true) {
-                    dlBtn.style.display = 'inline-block';
-                    cardMsg.style.display = 'none';
-                } else {
-                    dlBtn.style.display = 'none';
-                    cardMsg.style.display = 'block';
-                }
-            } else {
-                dlBtn.style.display = 'none';
-                cardMsg.style.display = 'none';
-            }
-
-            if (currentUserStatus === 'New' || currentUserStatus === 'Rejected') {
-                if (currentConfig.payment_active === false) {
-                    payBtn.style.display = 'none';
-                    msgClosed.style.display = 'block';
-                } else {
-                    payBtn.style.display = 'block';
-                    msgClosed.style.display = 'none';
-                    payBtn.innerHTML = currentUserStatus === 'Rejected' ? `<i class="fas fa-redo"></i> ${langData[currentLang].btn_retry}` : `<i class="fas fa-credit-card"></i> ${langData[currentLang].payBtn}`;
-                }
-            } else {
-                payBtn.style.display = 'none';
-                msgClosed.style.display = 'none';
-            }
-        }
-
-        async function fetchConfig() {
-            try {
-                const docSnap = await getDoc(doc(db, "config", "fees"));
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    currentConfig = { ...currentConfig, ...data };
-                    
-                    document.getElementById('dispSpouseFee').innerText = currentConfig.spouse_fee;
-                    document.getElementById('dispKidFee').innerText = currentConfig.kid_fee;
-                    document.getElementById('displayTotal').innerText = currentConfig.self_fee;
-
-                    // Update Card Fee Modal Details from Admin Config
-                    document.getElementById('adminNoticeText').innerText = currentConfig.card_notice_text || "ডেমো নোটিশ: কার্ড ডাউনলোডের জন্য ৫ টাকা ফি প্রযোজ্য।";
-                    document.getElementById('adminFeeAmount').innerText = currentConfig.card_download_fee || "5";
-                    
-                    // --- FIX FOR BKASH NUMBER DISPLAY ---
-                    // Now prioritizing the 'admin_bkash_number' field over payment methods
-                    let targetNumber = "01xxxxxxxxx";
-                    if (currentConfig.admin_bkash_number) {
-                        targetNumber = currentConfig.admin_bkash_number;
-                    } else if (currentConfig.accounts && currentConfig.accounts.bKash && currentConfig.accounts.bKash !== "Enabled") {
-                        // Only use accounts.bKash if it's not just a status flag like "Enabled"
-                        targetNumber = currentConfig.accounts.bKash;
-                    }
-                    
-                    document.getElementById('adminBkashNumber').innerText = targetNumber;
-
-                    const select = document.getElementById('payMethod');
-                    select.innerHTML = `<option value="" data-key="select">Select</option>`;
-                    if (currentConfig.accounts) {
-                        for (const [methodName, number] of Object.entries(currentConfig.accounts)) {
-                            const option = document.createElement('option');
-                            option.value = methodName;
-                            option.innerText = methodName;
-                            select.appendChild(option);
+                        const data = docSnap.data();
+                        document.getElementById('setSelfFee').value = data.self_fee || 1000;
+                        document.getElementById('setSpouseFee').value = data.spouse_fee || 500;
+                        document.getElementById('setKidFee').value = data.kid_fee || 300;
+                        if (data.payment_active !== undefined) {
+                            document.getElementById('paymentToggle').checked = data.payment_active;
+                        } else {
+                            document.getElementById('paymentToggle').checked = true; 
                         }
-                    }
-                    updateTexts();
-                    if(currentUserDocId) updateStatusText(); 
-                }
-            } catch(e) { console.log("Config Error", e); }
-        }
-        fetchConfig();
-
-        // --- UPDATED CARD FEE LOGIC (AUTOMATED + OCR) ---
-        window.closeCardFeeModal = function() {
-            document.getElementById('cardFeeModal').style.display = 'none';
-        }
-
-        // 1. SMART PASTE HANDLER
-        document.getElementById('cardTrxInput').addEventListener('input', function(e) {
-            const val = e.target.value;
-            // Regex to find TrxID (starts with 8-10 chars, alphanum)
-            // bKash usually starts with digits or letters, mixed.
-            // Let's look for pattern like "TrxID XXXXXXX" or just long strings if pasted
-            
-            if (val.length > 20) { // Likely a full SMS paste
-                const match = val.match(/(?:TrxID|TxnID|Trans ID)[\s:]*([A-Z0-9]+)/i);
-                if (match && match[1]) {
-                    e.target.value = match[1].toUpperCase();
-                    Swal.fire({
-                        toast: true, position: 'top', icon: 'success', 
-                        title: 'TrxID Auto-Extracted!', showConfirmButton: false, timer: 1500
-                    });
-                }
-            }
-        });
-
-        // 2. TRIGGER CAMERA
-        window.triggerCamera = function() {
-            document.getElementById('scanInput').click();
-        }
-
-        // 3. HANDLE SCREENSHOT (UPDATED WITH NEW FULL SCREEN LOADER)
-        window.handleScreenshot = async function(input) {
-            if (input.files && input.files[0]) {
-                const file = input.files[0];
-                
-                // Show Custom Full Screen Loader
-                const loader = document.getElementById('black-loading-screen');
-                const pctText = document.getElementById('ocr-percentage');
-                loader.style.display = 'flex';
-                pctText.innerText = "0%";
-
-                try {
-                    // Create worker with logger
-                    const worker = await Tesseract.createWorker({
-                        logger: m => {
-                            if (m.status === 'recognizing text') {
-                                const pct = Math.round(m.progress * 100);
-                                pctText.innerText = pct + '%';
-                            }
-                        }
-                    });
-                    
-                    // Initialization for v4 (Stable for this CDN)
-                    await worker.loadLanguage('eng');
-                    await worker.initialize('eng');
-                    
-                    const { data: { text } } = await worker.recognize(file);
-                    await worker.terminate();
-
-                    console.log("OCR Output:", text); // Debugging
-
-                    // Hide Loader
-                    loader.style.display = 'none';
-
-                    // Enhanced Regex to find TrxID
-                    // 1. Look for explicit labels: TrxID, TxnID, Trans ID followed by alphanumeric
-                    // 2. Or look for a standalone uppercase alphanumeric string of 8-12 chars (common bKash TrxID length)
-                    // Clean text first: remove spaces inside potential IDs
-                    const cleanText = text.replace(/\s/g, " "); // Normalize spaces
-                    
-                    // Match "TrxID XXXXXXX" type patterns
-                    let match = cleanText.match(/(?:TrxID|TxnID|Trans ID|ID)[\s:.]*([A-Z0-9]{8,15})/i);
-                    
-                    if (!match) {
-                        // Fallback: Find 8-12 char uppercase alphanumeric words that might be the ID
-                        // bKash IDs often start with digits or characters, usually 10 chars.
-                        // Example: 9G7H76...
-                        const words = cleanText.split(/[\s,]+/);
-                        for(let w of words) {
-                            // Remove special chars
-                            let cleanW = w.replace(/[^A-Z0-9]/gi, '');
-                            // Check if length is 9-12 and contains at least one digit and one letter (common structure)
-                            if(cleanW.length >= 8 && cleanW.length <= 12 && /[A-Z]/.test(cleanW) && /[0-9]/.test(cleanW)) {
-                                match = [null, cleanW]; // Simulate match array
-                                break;
-                            }
-                        }
-                    }
-                    
-                    if (match && match[1]) {
-                        document.getElementById('cardTrxInput').value = match[1].toUpperCase();
-                        Swal.fire({
-                            icon: 'success', title: 'Found!',
-                            text: `TrxID: ${match[1].toUpperCase()}`,
-                            timer: 1500, showConfirmButton: false
-                        });
-                    } else {
-                        Swal.fire({
-                            icon: 'error', title: 'Failed',
-                            text: 'Could not find TrxID automatically. Please type it.'
-                        });
-                    }
-
-                } catch (err) {
-                    console.error(err);
-                    loader.style.display = 'none';
-                    Swal.fire({ icon: 'error', title: 'Error', text: 'Scanning failed. Try again.' });
-                }
-                
-                // Reset input
-                input.value = '';
-            }
-        }
-
-        // 4. VERIFY PAYMENT (MAIN LOGIC)
-        window.verifyCardPayment = async function() {
-            const trxId = document.getElementById('cardTrxInput').value.trim().toUpperCase();
-            const msgBox = document.getElementById('cardVerifyMsg');
-            const verifyBtn = document.getElementById('verifyCardBtn');
-            const requiredAmount = parseFloat(currentConfig.card_download_fee || 5);
-
-            if(trxId.length < 5) {
-                msgBox.style.color = 'red';
-                msgBox.innerText = "❌ দয়া করে সঠিক TrxID দিন।";
-                return;
-            }
-
-            verifyBtn.disabled = true;
-            verifyBtn.innerText = "Checking...";
-            msgBox.innerText = "";
-
-            try {
-                // 1. DUPLICATE CHECK
-                const usedCheck = await getDoc(doc(db, "used_trx", trxId));
-                if (usedCheck.exists()) {
-                    throw new Error("এই TrxID টি ইতিমধ্যে ব্যবহার করা হয়েছে!");
-                }
-
-                // 2. CHECK SMS FORWARDER DATA
-                const smsQuery = query(collection(db, "sms"), limit(100)); 
-                const smsSnap = await getDocs(smsQuery);
-
-                let found = false;
-                let foundAmount = 0;
-
-                for (const docSnap of smsSnap.docs) {
-                    const smsData = docSnap.data();
-                    const body = (smsData.body || smsData.message || "").toUpperCase();
-
-                    if (body.includes(trxId)) {
-                        const amountMatch = body.match(/Tk\s*([\d.]+)/i);
-                        if (amountMatch) {
-                            foundAmount = parseFloat(amountMatch[1]);
-                            if (foundAmount >= requiredAmount) {
-                                found = true;
-                                break; 
-                            }
-                        }
-                    }
-                }
-
-                if(found) {
-                    // Success
-                    await updateDoc(doc(db, "students", currentUserDocId), {
-                        card_fee_paid: true,
-                        card_trx_id: trxId
-                    });
-
-                    await setDoc(doc(db, "used_trx", trxId), {
-                        used_by: currentUserDocId,
-                        amount: foundAmount,
-                        timestamp: serverTimestamp()
-                    });
-                    
-                    currentUserData.card_fee_paid = true;
-                    currentUserData.card_trx_id = trxId;
-
-                    msgBox.style.color = 'green';
-                    msgBox.innerText = "✅ ভেরিফিকেশন সফল! ডাউনলোড শুরু হচ্ছে...";
-                    
-                    setTimeout(() => {
-                        closeCardFeeModal();
-                        realDownloadCard(); 
-                    }, 1500);
-
-                } else {
-                    msgBox.style.color = 'red';
-                    msgBox.innerText = `❌ পেমেন্ট পাওয়া যায়নি অথবা টাকার পরিমাণ কম।`;
-                    verifyBtn.disabled = false;
-                    verifyBtn.innerText = "Verify & Download";
-                }
-
-            } catch(e) {
-                msgBox.style.color = 'red';
-                msgBox.innerText = "❌ " + e.message;
-                verifyBtn.disabled = false;
-                verifyBtn.innerText = "Verify & Download";
-            }
-        }
-
-        // --- AUTO LOGIN AFTER REGISTRATION ---
-        document.getElementById('regForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('regBtn');
-            btn.disabled = true; btn.innerText = langData[currentLang].alert_wait;
-            
-            const file = document.getElementById('regPhoto').files[0];
-            const formData = new FormData(); formData.append("image", file);
-
-            try {
-                const q = query(collection(db, "students"), where("phone", "==", document.getElementById('regPhone').value));
-                if (!(await getDocs(q)).empty) throw new Error(langData[currentLang].alert_exists);
-
-                const imgRes = await fetch(`https://api.imgbb.com/1/upload?key=${imgbbAPI}`, { method: "POST", body: formData });
-                const imgData = await imgRes.json();
-                
-                const studentData = {
-                    name: document.getElementById('regName').value,
-                    batch: document.getElementById('regBatch').value,
-                    phone: document.getElementById('regPhone').value,
-                    alt_phone: document.getElementById('regAltPhone').value,
-                    address: document.getElementById('regAddress').value,
-                    password: document.getElementById('regPass').value,
-                    photo: imgData.data.url,
-                    payment_status: "New", total_amount: 0, createdAt: serverTimestamp(),
-                    card_fee_paid: false // Initial status
-                };
-
-                const docRef = await addDoc(collection(db, "students"), studentData);
-                
-                showAlert('Success!', langData[currentLang].alert_reg_ok, 'success');
-                
-                // SAVE SESSION ID
-                localStorage.setItem("reunion_user_id", docRef.id);
-                
-                currentUserDocId = docRef.id;
-                showProfile(studentData); 
-                
-            } catch (err) { 
-                showAlert('Error!', err.message, 'error'); 
-                btn.disabled = false; btn.innerText = langData[currentLang].regBtn; 
-            }
-        });
-
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('loginBtn');
-            btn.innerText = langData[currentLang].alert_wait;
-            try {
-                const q = query(collection(db, "students"), where("phone", "==", document.getElementById('loginPhone').value));
-                const snap = await getDocs(q);
-                let user = null;
-                let uId = null;
-                snap.forEach(d => { 
-                    if(d.data().password === document.getElementById('loginPass').value) { 
-                        user = d.data(); 
-                        uId = d.id;
-                        currentUserDocId = d.id; 
-                    } 
-                });
-                
-                if (user) {
-                    // SAVE SESSION ID
-                    localStorage.setItem("reunion_user_id", uId);
-                    showProfile(user);
-                }
-                else showAlert('Failed', langData[currentLang].alert_login_fail, 'error');
-            } catch (err) { showAlert('Error', 'Something went wrong', 'error'); }
-            btn.innerText = langData[currentLang].loginBtn;
-        });
-
-        function showProfile(user) {
-            currentUserData = user; // Save for download logic
-            document.getElementById('authContainer').style.display = 'none';
-            document.getElementById('profileView').style.display = 'block';
-            document.getElementById('logoutBtn').style.display = 'block';
-            document.querySelector('.approved-batch-btn').style.display = 'none';
-
-            document.getElementById('viewName').innerText = user.name;
-            document.getElementById('viewBatch').innerText = user.batch;
-            document.getElementById('viewPhone').innerText = user.phone;
-            
-            if(user.alt_phone) {
-                document.getElementById('rowAltPhone').style.display = 'flex';
-                document.getElementById('viewAltPhone').innerText = user.alt_phone;
-            } else {
-                document.getElementById('rowAltPhone').style.display = 'none';
-            }
-
-            document.getElementById('viewAddress').innerText = user.address;
-            document.getElementById('viewPhoto').src = user.photo;
-
-            const statusBox = document.getElementById('statusContainer');
-            const fullDetails = document.getElementById('approvedDetails');
-            const slDisplay = document.getElementById('slNumberDisplay');
-
-            if (user.payment_status === "Approved") currentUserStatus = 'Approved';
-            else if (user.payment_status === "Rejected") currentUserStatus = 'Rejected';
-            else if (user.total_amount > 0) currentUserStatus = 'Pending';
-            else currentUserStatus = 'New';
-
-            updateStatusText();
-
-            if (currentUserStatus === "Approved") {
-                statusBox.className = "status-badge status-success";
-                
-                fullDetails.style.display = 'block';
-                slDisplay.style.display = 'inline-block';
-                slDisplay.innerText = "SL: #" + user.serial_number;
-
-                document.getElementById('vMethod').innerText = user.payment_method;
-                document.getElementById('vSender').innerText = user.sender_number;
-                document.getElementById('vAmount').innerText = user.total_amount + " ৳";
-                
-                document.getElementById('vTshirt').innerText = user.tshirt || "N/A";
-
-                let hasGuest = false;
-                if(user.guest_info) {
-                    if(user.guest_info.spouse && user.guest_info.spouse !== "No") { document.getElementById('rowSpouse').style.display='flex'; document.getElementById('vSpouse').innerText=user.guest_info.spouse; hasGuest=true; }
-                    if(user.guest_info.kid_above && user.guest_info.kid_above !== "No") { document.getElementById('rowKidA').style.display='flex'; document.getElementById('vKidA').innerText=user.guest_info.kid_above; hasGuest=true; }
-                    if(user.guest_info.kid_below && user.guest_info.kid_below !== "No") { document.getElementById('rowKidB').style.display='flex'; document.getElementById('vKidB').innerText=user.guest_info.kid_below; hasGuest=true; }
-                }
-                if(!hasGuest) document.getElementById('vGuestBox').style.display = 'none';
-
-                fetchStats();
-
-            } else {
-                fullDetails.style.display = 'none';
-                slDisplay.style.display = 'none';
-                document.querySelectorAll('.stats-box').forEach(el => el.style.display = 'none'); 
-
-                if(currentUserStatus === "Rejected") statusBox.className = "status-badge status-rejected";
-                else if(currentUserStatus === "Pending") statusBox.className = "status-badge status-pending";
-                else statusBox.className = "status-badge status-pending"; 
-            }
-        }
-
-        // --- DOWNLOAD CARD FUNCTION ---
-        window.generateAndDownloadCard = function() {
-            if(currentUserStatus !== 'Approved') return;
-
-            // NEW: Check if card fee is paid
-            if(currentUserData.card_fee_paid !== true) {
-                // If not paid, show the Fee Modal
-                document.getElementById('cardFeeModal').style.display = 'flex';
-                return;
-            }
-
-            // If Paid, Proceed to Download
-            realDownloadCard();
-        }
-
-        function realDownloadCard() {
-            // 1. Populate Hidden Card Data
-            document.getElementById('outName').innerText = currentUserData.name;
-            document.getElementById('outBatch').innerText = currentUserData.batch;
-            document.getElementById('outSL').innerText = currentUserData.serial_number;
-            document.getElementById('user-pic').src = currentUserData.photo;
-            
-            // 2. Set Current Date
-            document.getElementById('outDate').innerText = new Date().toLocaleDateString('en-GB');
-
-            // 3. Show Loading Toast
-            const Toast = Swal.mixin({
-                toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, timerProgressBar: true,
-                didOpen: (toast) => { toast.addEventListener('mouseenter', Swal.stopTimer); toast.addEventListener('mouseleave', Swal.resumeTimer); }
-            });
-            Toast.fire({ icon: 'info', title: 'Generating Card...' });
-
-            // 4. Capture & Download
-            const cardElement = document.getElementById('final-card');
-            
-            // Wait a bit for image to set in DOM
-            setTimeout(() => {
-                html2canvas(cardElement, {
-                    scale: 3, 
-                    useCORS: true,
-                    allowTaint: true,
-                    backgroundColor: null
-                }).then(canvas => {
-                    const link = document.createElement('a');
-                    link.download = `Reunion-Card-${currentUserData.batch}-${currentUserData.serial_number}.png`;
-                    link.href = canvas.toDataURL();
-                    link.click();
-                    Toast.fire({ icon: 'success', title: 'Downloaded!' });
-                }).catch(err => {
-                    console.error(err);
-                    showAlert('Error', 'Failed to generate card. Try again.', 'error');
-                });
-            }, 500);
-        }
-
-        async function fetchStats() {
-            try {
-                const q = query(collection(db, "students"));
-                const snapshot = await getDocs(q);
-                let totalReg = 0;
-                let totalPaid = 0;
-                let totalMoney = 0;
-                let totalGuests = 0;
-
-                snapshot.forEach(doc => {
-                    const u = doc.data();
-                    totalReg++;
-                    
-                    if(u.payment_status === "Approved") {
-                        totalPaid++;
-                        totalMoney += (parseInt(u.total_amount) || 0);
-
-                        if(u.guest_info) {
-                            if(u.guest_info.spouse && u.guest_info.spouse !== "No") totalGuests++;
-                            if(u.guest_info.kid_below && u.guest_info.kid_below !== "No") totalGuests++;
-                            if(u.guest_info.kid_above && u.guest_info.kid_above !== "No") {
-                                let match = u.guest_info.kid_above.match(/\((\d+)\)/);
-                                if(match) totalGuests += parseInt(match[1]);
-                                else totalGuests++;
-                            }
-                        }
+                        paymentMethods = data.accounts || {};
+                        renderMethodsList();
                     }
                 });
-
-                document.querySelectorAll('.stats-box').forEach(el => el.style.display = 'block');
-                document.getElementById('valRegistered').innerText = totalReg;
-                document.getElementById('valPaid').innerText = totalPaid;
-                document.getElementById('valCollected').innerText = totalMoney + " ৳";
-                document.getElementById('valGuest').innerText = totalGuests;
-
             } catch(e) { console.log(e); }
         }
 
-        // --- PAYMENT & CALCULATION ---
-        document.getElementById('showPayFormBtn').addEventListener('click', () => {
-            document.getElementById('mainIdCard').style.display = 'none';
-            document.getElementById('logoutBtn').style.display = 'none';
-            document.getElementById('paymentFormSection').style.display = 'block';
-            calculateTotal();
-        });
-
-        window.hidePaymentForm = function() {
-            document.getElementById('paymentFormSection').style.display = 'none';
-            document.getElementById('mainIdCard').style.display = 'block';
-            document.getElementById('logoutBtn').style.display = 'block';
-        };
-
-        window.calculateTotal = function() {
-            let total = currentConfig.self_fee;
-            const spCheck = document.getElementById('checkSpouse');
-            document.getElementById('spouseName').style.display = spCheck.checked ? 'block' : 'none';
-            if(spCheck.checked) total += currentConfig.spouse_fee;
-
-            const kbCheck = document.getElementById('checkKidsBelow');
-            document.getElementById('kidsBelowName').style.display = kbCheck.checked ? 'block' : 'none';
-
-            const kaCheck = document.getElementById('checkKidsAbove');
-            document.getElementById('kidsAboveBox').style.display = kaCheck.checked ? 'block' : 'none';
-            if(kaCheck.checked) total += (currentConfig.kid_fee * parseInt(document.getElementById('kidsAboveQty').value));
-
-            document.getElementById('displayTotal').innerText = total;
-            return total;
-        };
-
-        document.getElementById('confirmPayBtn').addEventListener('click', async () => {
-            const btn = document.getElementById('confirmPayBtn');
-            const tshirtSize = document.getElementById('payTshirt').value;
-            const payMethod = document.getElementById('payMethod').value;
-            const senderPhone = document.getElementById('senderPhone').value;
-
-            // --- MANDATORY VALIDATIONS ---
-            if (!tshirtSize) {
-                showAlert('Missing Info', langData[currentLang].alert_tshirt, 'warning');
-                return;
-            }
-            if (payMethod === "" || !payMethod) {
-                showAlert('Missing Info', langData[currentLang].alert_method_req, 'warning');
-                return;
-            }
-            if (senderPhone.trim() === "") {
-                showAlert('Missing Info', langData[currentLang].alert_sender_req, 'warning');
-                return;
-            }
-
-            btn.disabled = true;
+        window.togglePaymentSystem = async function() {
+            const status = document.getElementById('paymentToggle').checked;
             try {
-                const guests = {
-                    spouse: document.getElementById('checkSpouse').checked ? document.getElementById('spouseName').value : "No",
-                    kid_below: document.getElementById('checkKidsBelow').checked ? document.getElementById('kidsBelowName').value : "No",
-                    kid_above: document.getElementById('checkKidsAbove').checked ? `${document.getElementById('kidsAboveName').value} (${document.getElementById('kidsAboveQty').value})` : "No"
-                };
-
-                await updateDoc(doc(db, "students", currentUserDocId), {
-                    total_amount: calculateTotal(),
-                    sender_number: senderPhone,
-                    trx_id: "N/A", 
-                    payment_method: payMethod,
-                    tshirt: tshirtSize,
-                    target_number: "N/A", 
-                    guest_info: guests,
-                    payment_status: "Submitted", submitted_at: new Date()
-                });
-                
-                showAlert('Great!', langData[currentLang].alert_pay_ok, 'success'); 
-                
-                hidePaymentForm(); 
-                const updatedSnap = await getDoc(doc(db, "students", currentUserDocId));
-                showProfile(updatedSnap.data());
-                btn.disabled = false;
-
-            } catch (err) { 
-                console.error(err);
-                showAlert('Error', err.message, 'error');
-                btn.disabled = false; 
+                await setDoc(doc(db, "config", "fees"), { payment_active: status }, { merge: true });
+            } catch(e) {
+                alert("Error updating status: " + e.message);
+                document.getElementById('paymentToggle').checked = !status;
             }
-        });
+        }
 
-        window.switchTab = function(t) {
-            document.getElementById('loginSection').classList.toggle('active', t==='login');
-            document.getElementById('registerSection').classList.toggle('active', t==='register');
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
-        } 
+        function renderMethodsList() {
+            const container = document.getElementById('methodsListContainer');
+            container.innerHTML = "";
+            for (const [name, val] of Object.entries(paymentMethods)) {
+                container.innerHTML += `
+                    <div class="method-list-item">
+                        <div style="font-weight:700; font-size:14px; color:#444;">${name}</div>
+                        <i class="fas fa-trash-alt del-btn" onclick="deleteMethod('${name}')"></i>
+                    </div>
+                `;
+            }
+        }
+
+        window.addNewMethod = async function() {
+            const name = document.getElementById('newMethodName').value.trim();
+            if(!name) { alert("Please enter a method name"); return; }
+            paymentMethods[name] = "Enabled"; 
+            await setDoc(doc(db, "config", "fees"), { accounts: paymentMethods }, { merge: true });
+            document.getElementById('newMethodName').value = "";
+        }
+
+        window.deleteMethod = async function(key) {
+            if(!confirm("Delete this method?")) return;
+            delete paymentMethods[key];
+            await updateDoc(doc(db, "config", "fees"), { accounts: paymentMethods });
+        }
+
+        window.saveIndividual = async function(field, id) {
+            const val = document.getElementById(id).value;
+            let data = {};
+            data[field] = Number(val);
+            await setDoc(doc(db, "config", "fees"), data, { merge: true });
+            alert("Fee Updated!");
+        }
+
+        // --- HELPER ---
+        function getGuestCount(u) {
+            let count = 0;
+            if(!u.guest_info) return 0;
+            if(u.guest_info.spouse && u.guest_info.spouse !== "No") count++;
+            if(u.guest_info.kid_below && u.guest_info.kid_below !== "No") count++;
+            if(u.guest_info.kid_above && u.guest_info.kid_above !== "No") {
+                let match = u.guest_info.kid_above.match(/\((\d+)\)/);
+                count += match ? parseInt(match[1]) : 1;
+            }
+            return count;
+        }
+
+        function startDataListener() {
+            unsubscribeData = onSnapshot(collection(db, "students"), (snapshot) => {
+                allData = [];
+                let totalMoney = 0;
+                let paidUsers = 0;
+                let totalGuests = 0;
+
+                snapshot.forEach(doc => {
+                    let d = doc.data();
+                    d.id = doc.id;
+                    allData.push(d);
+                    
+                    if(d.payment_status === "Approved") {
+                        totalMoney += (parseInt(d.total_amount) || 0);
+                        paidUsers++;
+                        totalGuests += getGuestCount(d);
+                    }
+                });
+
+                document.getElementById('dTotal').innerText = allData.length;
+                document.getElementById('dPaidCount').innerText = paidUsers; 
+                document.getElementById('dAmount').innerText = totalMoney + " ৳";
+                document.getElementById('dGuestCount').innerText = totalGuests;
+
+                renderDashboard();
+                renderReviewList();
+                renderBatches();
+                renderRegisteredBatches(); // New function for All Registered
+            });
+        }
+
+        // --- DASHBOARD (PENDING: SUBMITTED -> VERIFIED) ---
+        window.renderDashboard = function() {
+            const table = document.getElementById('pendingTable');
+            const term = document.getElementById('searchAll').value.toLowerCase();
+            table.innerHTML = "";
+
+            // Filter for 'Submitted' or 'Pending Approval' (Legacy)
+            const list = allData.filter(u => 
+                (u.payment_status === "Submitted" || u.payment_status === "Pending Approval") &&
+                (
+                    (u.name && u.name.toLowerCase().includes(term)) ||
+                    (u.phone && u.phone.includes(term)) ||
+                    (u.batch && u.batch.toString().includes(term))
+                )
+            );
+
+            if(list.length === 0) { 
+                table.innerHTML = "<tr><td colspan='4' style='padding:20px; text-align:center; color:#888;'>No new requests.</td></tr>"; 
+                return; 
+            }
+
+            list.forEach(u => {
+                table.innerHTML += `
+                    <tr>
+                        <td style="width:50px"><img src="${u.photo}" class="user-avatar"></td>
+                        <td>
+                            <div style="font-weight:600; color:#333;">${u.name}</div>
+                            <div style="font-size:11px; color:#888">Batch: ${u.batch}</div>
+                        </td>
+                        <td style="font-weight:600; color:#2c3e50;">${u.total_amount || 0}৳</td>
+                        <td><button onclick="openProfile('${u.id}')" style="padding:6px 12px; background:linear-gradient(to right, #6a11cb, #2575fc); color:white; border:none; border-radius:6px; cursor:pointer; font-size:12px; box-shadow: 0 4px 10px rgba(37, 117, 252, 0.3);">Check</button></td>
+                    </tr>
+                `;
+            });
+        }
+
+        // --- REVIEW LIST (VERIFIED -> APPROVED) ---
+        window.renderReviewList = function() {
+            const table = document.getElementById('reviewTable');
+            table.innerHTML = "";
+
+            const list = allData.filter(u => u.payment_status === "Verified");
+
+            if(list.length === 0) { 
+                table.innerHTML = "<tr><td colspan='4' style='padding:20px; text-align:center; color:#888;'>No users for final review.</td></tr>"; 
+                return; 
+            }
+
+            list.forEach(u => {
+                table.innerHTML += `
+                    <tr>
+                        <td style="width:50px"><img src="${u.photo}" class="user-avatar"></td>
+                        <td>
+                            <div style="font-weight:600; color:#333;">${u.name}</div>
+                            <div style="font-size:11px; color:#888">Batch: ${u.batch}</div>
+                        </td>
+                        <td style="font-weight:600; color:#d35400;">Verified</td>
+                        <td><button onclick="openProfile('${u.id}')" style="padding:6px 12px; background:linear-gradient(to right, #f39c12, #d35400); color:white; border:none; border-radius:6px; cursor:pointer; font-size:12px; box-shadow: 0 4px 10px rgba(211, 84, 0, 0.3);">Finalize</button></td>
+                    </tr>
+                `;
+            });
+        }
+
+        // ---------------------------------------------
+        // --- NEW SECTION: REGISTERED BATCHES (ALL) ---
+        // ---------------------------------------------
+        window.renderRegisteredBatches = function() {
+            const grid = document.getElementById('regBatchGrid');
+            const counts = {};
+            
+            // Count ALL users
+            allData.forEach(u => { 
+                counts[u.batch] = (counts[u.batch] || 0) + 1; 
+            });
+
+            grid.innerHTML = "";
+            if(Object.keys(counts).length === 0) {
+                grid.innerHTML = "<p style='text-align:center; width:100%; color:#fff; grid-column:1/-1; padding:20px;'>No registered members yet.</p>";
+                return;
+            }
+
+            Object.keys(counts).sort().forEach(b => {
+                grid.innerHTML += `
+                    <div class="batch-card" onclick="openRegisteredBatchDetail('${b}')">
+                        <h2>${b}</h2>
+                        <p>${counts[b]} Registered</p>
+                    </div>
+                `;
+            });
+        }
+
+        window.openRegisteredBatchDetail = function(batch) {
+            currentRegViewBatch = batch;
+            document.getElementById('regBatchTitleName').innerText = batch;
+            document.getElementById('regBatchGrid').style.display = 'none';
+            document.getElementById('regSearchContainer').style.display = 'none';
+            document.getElementById('searchRegistered').value = ""; 
+            document.getElementById('regBatchDetailView').style.display = 'block';
+            
+            const table = document.getElementById('regBatchTable');
+            table.innerHTML = "";
+            
+            // Filter ALL users of that batch
+            const users = allData.filter(u => u.batch == batch);
+            users.sort((a, b) => {
+                // Sort by approved first, then name
+                if (a.payment_status === "Approved" && b.payment_status !== "Approved") return -1;
+                if (a.payment_status !== "Approved" && b.payment_status === "Approved") return 1;
+                return a.name.localeCompare(b.name);
+            });
+
+            users.forEach(u => {
+                let statusBadge = '';
+                
+                // --- UPDATE HERE ---
+                if(u.payment_status === "Approved") {
+                    statusBadge = '<span class="badge bg-approved">Approved</span>';
+                } else if(u.payment_status === "Verified") {
+                    statusBadge = '<span class="badge bg-pending">Verified</span>';
+                } else if(u.payment_status === "Rejected") {
+                    statusBadge = '<span class="badge" style="background:#ffebee; color:red;">Rejected</span>';
+                } else {
+                    // "New" এর বদলে এখানে "Not Approved" দেওয়া হলো (Grey Color)
+                    statusBadge = '<span class="badge" style="background:#f1f2f6; color:#7f8c8d; border:1px solid #ced6e0;">Not Approved</span>';
+                }
+                // -------------------
+
+                table.innerHTML += `
+                    <tr>
+                        <td style="width:50px"><img src="${u.photo}" class="user-avatar"></td>
+                        <td>
+                            <div style="font-weight:600;">${u.name}</div>
+                            <div style="font-size:11px; color:#888">${u.phone}</div>
+                        </td>
+                        <td>
+                            ${statusBadge}
+                        </td>
+                        <td><button onclick="openProfile('${u.id}')" class="view-btn"><i class="fas fa-eye"></i></button></td>
+                    </tr>
+                `;
+            });
+        }
+
+        window.closeRegisteredView = function() {
+            document.getElementById('regBatchDetailView').style.display = 'none';
+            document.getElementById('regSearchContainer').style.display = 'none';
+            document.getElementById('regBatchGrid').style.display = 'grid';
+        }
+
+        window.searchRegisteredUsers = function() {
+            const term = document.getElementById('searchRegistered').value.toLowerCase();
+            // ... (বাকি কোড আগের মতোই থাকবে) ...
+
+            // ... (মাঝখানের লুপ অংশ) ...
+            list.forEach(u => {
+                let statusBadge = '';
+
+                // --- UPDATE HERE ---
+                if(u.payment_status === "Approved") {
+                    statusBadge = '<span class="badge bg-approved">Approved</span>';
+                } else if(u.payment_status === "Verified") {
+                    statusBadge = '<span class="badge bg-pending">Verified</span>';
+                } else {
+                    // এখানেও পরিবর্তন করা হলো
+                    statusBadge = '<span class="badge" style="background:#f1f2f6; color:#7f8c8d; border:1px solid #ced6e0;">Not Approved</span>';
+                }
+                // -------------------
+
+                table.innerHTML += `
+                    <tr>
+                        <td style="width:50px"><img src="${u.photo}" class="user-avatar"></td>
+                        <td>
+                            <div style="font-weight:600;">${u.name}</div>
+                            <div style="font-size:11px; color:#888">Batch: ${u.batch}</div>
+                        </td>
+                        <td>
+                            ${statusBadge}
+                        </td>
+                        <td><button onclick="openProfile('${u.id}')" class="view-btn"><i class="fas fa-eye"></i></button></td>
+                    </tr>
+                `;
+            });
+        }
+
+        window.downloadRegisteredExcel = function() {
+            // Filter ALL users
+            const users = [...allData];
+            
+            // Sort by Batch then Name
+            users.sort((a, b) => a.batch - b.batch || a.name.localeCompare(b.name));
+
+            if(users.length === 0) {
+                alert("No users to download.");
+                return;
+            }
+
+            const excelData = users.map(u => {
+                return {
+                    "Status": u.payment_status,
+                    "Name": u.name,
+                    "Batch": u.batch,
+                    "Phone": u.phone,
+                    "Amount": u.total_amount || 0,
+                    "Address": u.address || ""
+                };
+            });
+
+            const ws = XLSX.utils.json_to_sheet(excelData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "All Registered List");
+            XLSX.writeFile(wb, "All_Registered_Users.xlsx");
+        }
+        
+        window.downloadRegisteredBatchPDF = function() {
+            if (!currentRegViewBatch) return;
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('l', 'mm', 'a4'); 
+
+            // Get all users of this batch
+            const users = allData.filter(u => u.batch == currentRegViewBatch);
+            
+            // Sort Approved first
+            users.sort((a, b) => {
+                 if (a.payment_status === "Approved" && b.payment_status !== "Approved") return -1;
+                 if (a.payment_status !== "Approved" && b.payment_status === "Approved") return 1;
+                 return 0;
+            });
+
+            doc.setFontSize(18);
+            doc.text(`Batch ${currentRegViewBatch} - All Registered List`, 14, 15);
+            doc.setFontSize(11);
+            doc.text(`Total: ${users.length} | Generated: ${new Date().toLocaleDateString()}`, 14, 22);
+
+            const rows = users.map((u, index) => {
+                return [
+                    index + 1,               
+                    u.payment_status,  
+                    u.name,                  
+                    u.phone, 
+                    u.address || "-",        
+                    (u.total_amount || 0) + " Tk"   
+                ];
+            });
+
+            doc.autoTable({
+                head: [['#', 'Status', 'Name', 'Phone', 'Address', 'Amount']],
+                body: rows,
+                startY: 28,
+                theme: 'grid',
+                styles: { fontSize: 10, valign: 'middle', cellPadding: 3, overflow: 'linebreak' },
+                headStyles: { fillColor: [102, 126, 234], fontSize: 11, fontStyle: 'bold' }
+            });
+
+            doc.save(`Batch_${currentRegViewBatch}_Registered_List.pdf`);
+        }
+
+        // ---------------------------------------------
+        // --- EXISTING APPROVED BATCHES LOGIC ---
+        // ---------------------------------------------
+        window.renderBatches = function() {
+            const grid = document.getElementById('batchGrid');
+            const counts = {};
+            
+            allData.forEach(u => { 
+                if(u.payment_status === "Approved") {
+                    counts[u.batch] = (counts[u.batch] || 0) + 1; 
+                }
+            });
+
+            grid.innerHTML = "";
+            if(Object.keys(counts).length === 0) {
+                grid.innerHTML = "<p style='text-align:center; width:100%; color:#fff; grid-column:1/-1; padding:20px;'>No approved members yet.</p>";
+                return;
+            }
+
+            Object.keys(counts).sort().forEach(b => {
+                grid.innerHTML += `
+                    <div class="batch-card" onclick="openBatchDetail('${b}')">
+                        <h2>${b}</h2>
+                        <p>${counts[b]} Approved</p>
+                    </div>
+                `;
+            });
+        }
+
+        window.searchApprovedUsers = function() {
+            const term = document.getElementById('searchApproved').value.toLowerCase();
+            const grid = document.getElementById('batchGrid');
+            const searchView = document.getElementById('approvedSearchContainer');
+            const table = document.getElementById('approvedSearchTable');
+            const detailView = document.getElementById('batchDetailView');
+
+            detailView.style.display = 'none';
+
+            if(term.length === 0) {
+                grid.style.display = 'grid';
+                searchView.style.display = 'none';
+                return;
+            }
+
+            grid.style.display = 'none';
+            searchView.style.display = 'block';
+            table.innerHTML = "";
+
+            const list = allData.filter(u => 
+                u.payment_status === "Approved" &&
+                (
+                    (u.name && u.name.toLowerCase().includes(term)) ||
+                    (u.phone && u.phone.includes(term)) ||
+                    (u.batch && u.batch.toString().includes(term))
+                )
+            );
+
+            if(list.length === 0) {
+                table.innerHTML = "<tr><td colspan='4' style='padding:20px; text-align:center; color:#888;'>No approved users found.</td></tr>";
+                return;
+            }
+
+            list.forEach(u => {
+                let gCount = getGuestCount(u);
+                let guestBadge = gCount > 0 ? `<div class="badge bg-guest">Guest: +${gCount}</div>` : '';
+                table.innerHTML += `
+                    <tr>
+                        <td style="width:50px"><img src="${u.photo}" class="user-avatar"></td>
+                        <td>
+                            <div style="font-weight:600;">${u.name}</div>
+                            <div style="font-size:11px; color:#888">Batch: ${u.batch}</div>
+                        </td>
+                        <td>
+                            <span class="badge bg-approved">SL: #${u.serial_number || 'N/A'}</span>
+                            ${guestBadge}
+                        </td>
+                        <td><button onclick="openProfile('${u.id}')" class="view-btn"><i class="fas fa-eye"></i></button></td>
+                    </tr>
+                `;
+            });
+        }
+
+        window.openBatchDetail = function(batch) {
+            currentViewBatch = batch;
+            document.getElementById('batchTitleName').innerText = batch;
+            document.getElementById('batchGrid').style.display = 'none';
+            document.getElementById('approvedSearchContainer').style.display = 'none';
+            document.getElementById('searchApproved').value = ""; 
+            document.getElementById('batchDetailView').style.display = 'block';
+            
+            const table = document.getElementById('batchTable');
+            table.innerHTML = "";
+            
+            const users = allData.filter(u => u.batch == batch && u.payment_status === "Approved");
+            users.sort((a, b) => (a.serial_number || 0) - (b.serial_number || 0));
+
+            let batchGuests = 0;
+            users.forEach(u => batchGuests += getGuestCount(u));
+            
+            document.getElementById('bTotalMember').innerText = users.length;
+            document.getElementById('bTotalGuest').innerText = batchGuests;
+
+            users.forEach(u => {
+                let gCount = getGuestCount(u);
+                let guestBadge = gCount > 0 ? `<div class="badge bg-guest">Guest: +${gCount}</div>` : '';
+
+                table.innerHTML += `
+                    <tr>
+                        <td style="width:50px"><img src="${u.photo}" class="user-avatar"></td>
+                        <td>
+                            <div style="font-weight:600;">${u.name}</div>
+                            <div style="font-size:11px; color:#888">${u.phone}</div>
+                        </td>
+                        <td>
+                            <span class="badge bg-approved">SL: #${u.serial_number || 'N/A'}</span>
+                            ${guestBadge}
+                        </td>
+                        <td><button onclick="openProfile('${u.id}')" class="view-btn"><i class="fas fa-eye"></i></button></td>
+                    </tr>
+                `;
+            });
+        }
+
+        window.closeBatchView = function() {
+            document.getElementById('batchDetailView').style.display = 'none';
+            document.getElementById('approvedSearchContainer').style.display = 'none';
+            document.getElementById('batchGrid').style.display = 'grid';
+        }
+
+        // --- EXCEL EXPORT (WITH SIZE BREAKDOWN + TOTAL SUM) ---
+        window.downloadGlobalExcel = function() {
+            const users = allData.filter(u => u.payment_status === "Approved");
+            
+            // Sort by SL
+            users.sort((a, b) => (a.serial_number || 0) - (b.serial_number || 0));
+
+            if(users.length === 0) {
+                alert("No approved users to download.");
+                return;
+            }
+
+            // --- 1. যোগফল রাখার জন্য ভেরিয়েবল ---
+            let sumSpouse = 0;
+            let sumKidBelow = 0;
+            let sumKidAbove = 0;
+            let sumTotalParticipants = 0;
+            let sumTotalAmount = 0;
+            
+            // টি-শার্টের হিসাব
+            let tShirtCounts = {}; 
+            let totalTshirts = 0; // মোট কতটি টি-শার্ট, সেটা গোনার জন্য
+
+            // --- 2. Data Mapping & Calculation ---
+            const excelData = users.map(u => {
+                let spouseCount = (u.guest_info && u.guest_info.spouse && u.guest_info.spouse !== "No") ? 1 : 0;
+                
+                let kidBelowCount = 0;
+                if(u.guest_info && u.guest_info.kid_below && u.guest_info.kid_below !== "No") {
+                    let match = u.guest_info.kid_below.match(/\((\d+)\)/);
+                    kidBelowCount = match ? parseInt(match[1]) : 1;
+                }
+
+                let kidAboveCount = 0;
+                if(u.guest_info && u.guest_info.kid_above && u.guest_info.kid_above !== "No") {
+                    let match = u.guest_info.kid_above.match(/\((\d+)\)/);
+                    kidAboveCount = match ? parseInt(match[1]) : 1;
+                }
+
+                let totalParticipants = 1 + spouseCount + kidBelowCount + kidAboveCount;
+                let amount = parseInt(u.total_amount) || 0;
+                let tSize = u.tshirt ? u.tshirt.trim().toUpperCase() : "";
+
+                // মেইন যোগফল
+                sumSpouse += spouseCount;
+                sumKidBelow += kidBelowCount;
+                sumKidAbove += kidAboveCount;
+                sumTotalParticipants += totalParticipants;
+                sumTotalAmount += amount;
+
+                // **টি-শার্ট গোনা এবং মোট সংখ্যা বের করা**
+                if(tSize && tSize !== "N/A" && tSize !== "" && tSize !== "-") {
+                    tShirtCounts[tSize] = (tShirtCounts[tSize] || 0) + 1;
+                    totalTshirts++; // এখানে মোট টি-শার্টের সংখ্যা ১ করে বাড়ছে
+                }
+
+                return {
+                    "SL": u.serial_number || "",
+                    "Name": u.name,
+                    "SSC Batch": u.batch,
+                    "Cell No": u.phone,
+                    "Alternative Cell No": u.alt_phone || "",
+                    "No of Spouse": spouseCount,
+                    "No of Below 5 Years Kid": kidBelowCount,
+                    "No of Above 5 Years Kid": kidAboveCount,
+                    "Total Participants": totalParticipants,
+                    "Total Amount": amount,
+                    "T-Shirt Size": u.tshirt || ""
+                };
+            });
+
+            // --- 3. টি-শার্টের সামারি টেক্সট তৈরি করা ---
+            // আলাদা সাইজের লিস্ট বানানো
+            let tShirtSummaryText = Object.entries(tShirtCounts)
+                .map(([size, count]) => `${size}: ${count}`)
+                .join(", ");
+            
+            // **শেষে মোট যোগফল যুক্ত করা হচ্ছে (যেমন: = 9)**
+            if(totalTshirts > 0) {
+                tShirtSummaryText += ` = ${totalTshirts}`;
+            }
+
+            // --- 4. Total Row ---
+            const totalRow = {
+                "SL": "",
+                "Name": "",
+                "SSC Batch": "",
+                "Cell No": "",
+                "Alternative Cell No": "Total =", 
+                "No of Spouse": sumSpouse,
+                "No of Below 5 Years Kid": sumKidBelow,
+                "No of Above 5 Years Kid": sumKidAbove,
+                "Total Participants": sumTotalParticipants,
+                "Total Amount": sumTotalAmount,
+                "T-Shirt Size": tShirtSummaryText // এখানে আউটপুট হবে: "L: 2, XL: 4... = 9"
+            };
+
+            excelData.push(totalRow);
+
+            // Create Worksheet
+            const ws = XLSX.utils.json_to_sheet(excelData);
+            
+            const wscols = [
+                {wch:5}, {wch:25}, {wch:10}, {wch:15}, {wch:15},
+                {wch:12}, {wch:20}, {wch:20}, {wch:15}, {wch:12}, {wch:30} // কলাম চওড়া করা হলো
+            ];
+            ws['!cols'] = wscols;
+
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Participants List");
+
+            // Binary Download Code
+            const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'binary' });
+
+            function s2ab(s) {
+                const buf = new ArrayBuffer(s.length);
+                const view = new Uint8Array(buf);
+                for (let i = 0; i < s.length; i++) view[i] = s.charCodeAt(i) & 0xFF;
+                return buf;
+            }
+
+            const blob = new Blob([s2ab(wbout)], {type: "application/octet-stream"});
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            document.body.appendChild(a);
+            a.href = url;
+            a.download = "Get_Together_Participants_List.xlsx";
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        }
+
+        // --- PDF ---
+        window.downloadBatchPDF = function() {
+            if (!currentViewBatch) return;
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('l', 'mm', 'a4'); 
+
+            const users = allData.filter(u => u.batch == currentViewBatch && u.payment_status === "Approved");
+            users.sort((a, b) => (a.serial_number || 0) - (b.serial_number || 0));
+
+            doc.setFontSize(18);
+            doc.text(`Batch ${currentViewBatch} - Reunion 2026 Approved List`, 14, 15);
+            doc.setFontSize(11);
+            doc.text(`Total Students: ${users.length} | Generated: ${new Date().toLocaleDateString()}`, 14, 22);
+
+            const rows = users.map((u, index) => {
+                let guestStr = "None";
+                if(u.guest_info) {
+                    let parts = [];
+                    if(u.guest_info.spouse !== "No") parts.push(`Spouse: ${u.guest_info.spouse}`);
+                    if(u.guest_info.kid_above !== "No") parts.push(`Above 5 Years: ${u.guest_info.kid_above}`);
+                    if(u.guest_info.kid_below !== "No") parts.push(`Below 5 Years: ${u.guest_info.kid_below}`);
+                    if(parts.length > 0) guestStr = parts.join("\n");
+                }
+                
+                let phoneDisplay = u.phone;
+                if(u.alt_phone) phoneDisplay += "\n(Alt: " + u.alt_phone + ")";
+
+                return [
+                    index + 1,               
+                    u.serial_number || "-",  
+                    u.name,                  
+                    phoneDisplay, 
+                    u.address || "-",        
+                    u.tshirt || "N/A", 
+                    guestStr,                
+                    u.total_amount + " Tk"   
+                ];
+            });
+
+            doc.autoTable({
+                head: [['#', 'Global SL', 'Name', 'Phone', 'Address', 'T-Shirt', 'Guest Info', 'Amount']],
+                body: rows,
+                startY: 28,
+                theme: 'grid',
+                styles: { fontSize: 10, valign: 'middle', cellPadding: 3, overflow: 'linebreak' },
+                headStyles: { fillColor: [44, 62, 80], fontSize: 11, fontStyle: 'bold' },
+                columnStyles: {
+                    0: { cellWidth: 10 }, 
+                    1: { cellWidth: 18 }, 
+                    2: { cellWidth: 30 }, 
+                    3: { cellWidth: 30 }, 
+                    4: { cellWidth: 30 }, 
+                    5: { cellWidth: 15 }, 
+                    6: { cellWidth: 40 }, 
+                    7: { cellWidth: 20 }  
+                }
+            });
+
+            doc.save(`Batch_${currentViewBatch}_Full_List.pdf`);
+        }
+
+        // --- PROFILE MODAL & LOGIC ---
+        window.openProfile = function(id) {
+    selectedUserId = id;
+    const u = allData.find(x => x.id === id);
+    selectedUserStatus = u.payment_status;
+
+    document.getElementById('mPhoto').src = u.photo;
+    document.getElementById('mName').innerText = u.name;
+    document.getElementById('mBatch').innerText = "Batch: " + u.batch;
+    document.getElementById('mPhone').innerText = u.phone;
+    
+    // --- 1. SAVE IMAGE BUTTON LOGIC (NEW UPDATE) ---
+    const saveBtn = document.getElementById('btnSaveImg');
+    if (saveBtn) {
+        if (u.payment_status === "Approved") {
+            // শুধুমাত্র Approved হলে বাটন দেখাবে
+            saveBtn.style.display = 'flex'; 
+        } else {
+            // বাকি সব ক্ষেত্রে (Registered, Pending, Verified) বাটন লুকানো থাকবে
+            saveBtn.style.display = 'none';
+        }
+    }
+    // ------------------------------------------------
+
+    if(u.alt_phone) {
+        document.getElementById('rowAltPhone').style.display = 'flex';
+        document.getElementById('mAltPhone').innerText = u.alt_phone;
+    } else {
+        document.getElementById('rowAltPhone').style.display = 'none';
+    }
+
+    document.getElementById('mAddress').innerText = u.address || "N/A";
+    document.getElementById('mTshirt').innerText = u.tshirt || "N/A";
+    document.getElementById('mMethod').innerText = u.payment_method || "N/A";
+    
+    document.getElementById('mSender').innerText = u.sender_number || "N/A";
+    document.getElementById('mAmount').innerText = (u.total_amount || 0) + " ৳";
+
+    const btnDiv = document.getElementById('actionBtns');
+    const slBadge = document.getElementById('mSlNo');
+    const mainBtn = document.getElementById('btnApproveText');
+
+    // --- DYNAMIC BUTTON LOGIC --- 
+    if(u.payment_status === "Approved" || u.payment_status === "NEW") {
+        // Approved অথবা New ইউজার হলে বাটন লুকানো থাকবে
+        btnDiv.style.display = 'none';
+        
+        if(u.payment_status === "Approved") {
+            slBadge.style.display = 'block';
+            slBadge.innerText = "SL: #" + (u.serial_number || "N/A");
+        } else {
+            slBadge.style.display = 'none';
+        }
+    } else {
+        // বাকিদের (Submitted, Verified) জন্য বাটন দেখাবে
+        btnDiv.style.display = 'flex';
+        slBadge.style.display = 'none';
+        
+        if (u.payment_status === "Submitted" || u.payment_status === "Pending Approval") {
+            mainBtn.innerHTML = 'Review <i class="fas fa-check"></i>';
+        } else if (u.payment_status === "Verified") {
+            mainBtn.innerHTML = 'Final Approve <i class="fas fa-check-double"></i>';
+        } else {
+            mainBtn.innerHTML = 'Move to Review <i class="fas fa-check"></i>';
+        }
+    }
+
+    const guestSec = document.getElementById('guestSection');
+    let hasGuest = false;
+
+    document.getElementById('rowSpouse').style.display = 'none';
+    document.getElementById('rowKidAbove').style.display = 'none';
+    document.getElementById('rowKidBelow').style.display = 'none';
+
+    if(u.guest_info) {
+        if(u.guest_info.spouse && u.guest_info.spouse !== "No") {
+            document.getElementById('rowSpouse').style.display = 'flex';
+            document.getElementById('mSpouse').innerText = u.guest_info.spouse;
+            hasGuest = true;
+        }
+        if(u.guest_info.kid_above && u.guest_info.kid_above !== "No") {
+            document.getElementById('rowKidAbove').style.display = 'flex';
+            document.getElementById('mKidAbove').innerText = u.guest_info.kid_above;
+            hasGuest = true;
+        }
+        if(u.guest_info.kid_below && u.guest_info.kid_below !== "No") {
+            document.getElementById('rowKidBelow').style.display = 'flex';
+            document.getElementById('mKidBelow').innerText = u.guest_info.kid_below;
+            hasGuest = true;
+        }
+    }
+    guestSec.style.display = hasGuest ? 'block' : 'none';
+
+    document.getElementById('profileModal').style.display = 'flex';
+}
+        window.closeModal = function() { document.getElementById('profileModal').style.display = 'none'; }
+
+        // --- UPDATED PROCESS LOGIC ---
+        window.processUser = async function() {
+            // Logic based on current status
+            if (selectedUserStatus === "Submitted" || selectedUserStatus === "Pending Approval" || selectedUserStatus === "New" || selectedUserStatus === "Rejected") {
+                // Step 1: Pending -> Verified (Review List)
+                if(!confirm("Send this user to Final Review List?")) return;
+                try {
+                    await updateDoc(doc(db, "students", selectedUserId), { payment_status: "Verified" });
+                    alert("User sent to Review list!");
+                    closeModal();
+                } catch(e) { alert("Error: " + e.message); }
+
+            } else if (selectedUserStatus === "Verified") {
+                // Step 2: Verified -> Approved (Final)
+                if(!confirm("Final Approve this user? This will generate Serial Number.")) return;
+                try {
+                    const q = query(collection(db, "students"), where("payment_status", "==", "Approved"));
+                    const snapshot = await getCountFromServer(q);
+                    const newSL = snapshot.data().count + 1;
+
+                    await updateDoc(doc(db, "students", selectedUserId), {
+                        payment_status: "Approved",
+                        serial_number: newSL
+                    });
+                    alert("Approved Successfully! SL: " + newSL);
+                    closeModal();
+                } catch(e) { alert("Error: " + e.message); }
+            }
+        }
+
+        window.rejectUser = async function() {
+            if(!confirm("Reject request?")) return;
+            try {
+                await updateDoc(doc(db, "students", selectedUserId), { payment_status: "Rejected" });
+                alert("Rejected!"); closeModal();
+            } catch(e) { alert("Error: " + e.message); }
+        }
+
+        window.switchTab = function(id, el) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            el.classList.add('active');
+        }
+        window.downloadProfileImage = async function() {
+    const img = document.getElementById('mPhoto');
+    const imageUrl = img.src;
+    const userName = document.getElementById('mName').innerText || 'User';
+    const btn = document.getElementById('btnSaveImg');
+
+    if (!imageUrl) return;
+
+    // লোডিং ইফেক্ট
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+    try {
+        const response = await fetch(imageUrl);
+        const blob = await response.blob();
+        const blobUrl = window.URL.createObjectURL(blob);
+
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = `${userName}_Profile.jpg`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(blobUrl);
+        
+        // সাকসেস মেসেজ
+        btn.innerHTML = '<i class="fas fa-check"></i> Saved!';
+        setTimeout(() => btn.innerHTML = originalText, 2000);
+
+    } catch (error) {
+        // যদি সরাসরি ডাউনলোড না হয়, নতুন ট্যাবে ওপেন হবে
+        window.open(imageUrl, '_blank');
+        btn.innerHTML = originalText;
+    }
+}
     </script>
 </body>
 </html>
